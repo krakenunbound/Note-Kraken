@@ -5,8 +5,8 @@
     <TargetFramework>net8.0-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
     <ApplicationIcon>..\..\kraken_transparent.ico</ApplicationIcon>
-    <AssemblyName>KrakenPad_Setup</AssemblyName>
-    <RootNamespace>KrakenPadInstaller</RootNamespace>
+    <AssemblyName>NoteKraken_Setup</AssemblyName>
+    <RootNamespace>NoteKrakenInstaller</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PublishSingleFile>true</PublishSingleFile>
@@ -16,10 +16,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="..\..\release_build\KrakenPad.exe" LogicalName="KrakenPad.exe" />
-    <EmbeddedResource Include="..\..\release_build\KrakenPad.dll" LogicalName="KrakenPad.dll" />
-    <EmbeddedResource Include="..\..\release_build\KrakenPad.deps.json" LogicalName="KrakenPad.deps.json" />
-    <EmbeddedResource Include="..\..\release_build\KrakenPad.runtimeconfig.json" LogicalName="KrakenPad.runtimeconfig.json" />
+    <EmbeddedResource Include="..\..\release_build\NoteKraken.exe" LogicalName="NoteKraken.exe" />
+    <EmbeddedResource Include="..\..\release_build\NoteKraken.dll" LogicalName="NoteKraken.dll" />
+    <EmbeddedResource Include="..\..\release_build\NoteKraken.deps.json" LogicalName="NoteKraken.deps.json" />
+    <EmbeddedResource Include="..\..\release_build\NoteKraken.runtimeconfig.json" LogicalName="NoteKraken.runtimeconfig.json" />
     <EmbeddedResource Include="..\..\kraken_transparent.ico" LogicalName="kraken_transparent.ico" />
   </ItemGroup>
 

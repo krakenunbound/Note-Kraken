@@ -1,4 +1,4 @@
-namespace KrakenPad;
+namespace NoteKraken;
 
 partial class MainForm
 {

@@ -2,7 +2,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Microsoft.Win32;
 
-namespace KrakenPadInstaller;
+namespace NoteKrakenInstaller;
 
 public class InstallerForm : Form
 {
@@ -25,16 +25,16 @@ public class InstallerForm : Form
     private bool _isDarkMode;
 
     private static readonly string[] EmbeddedFiles = {
-        "KrakenPad.exe",
-        "KrakenPad.dll",
-        "KrakenPad.deps.json",
-        "KrakenPad.runtimeconfig.json",
+        "NoteKraken.exe",
+        "NoteKraken.dll",
+        "NoteKraken.deps.json",
+        "NoteKraken.runtimeconfig.json",
         "kraken_transparent.ico"
     };
 
     public InstallerForm()
     {
-        _defaultPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "KrakenPad");
+        _defaultPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "NoteKraken");
         _isDarkMode = IsWindowsDarkMode();
         InitializeComponent();
     }
@@ -59,7 +59,7 @@ public class InstallerForm : Form
 
     private void InitializeComponent()
     {
-        Text = "Kraken Pad Setup";
+        Text = "Note Kraken Setup";
         Size = new Size(500, 420);
         FormBorderStyle = FormBorderStyle.FixedDialog;
         MaximizeBox = false;
@@ -75,7 +75,7 @@ public class InstallerForm : Form
         // Title
         var title = new Label
         {
-            Text = "Kraken Pad",
+            Text = "Note Kraken",
             Font = new Font("Segoe UI", 18, FontStyle.Bold),
             Location = new Point(20, 15),
             AutoSize = true,
@@ -283,13 +283,13 @@ public class InstallerForm : Form
             await Task.Run(() => RegisterApplication(installPath));
             _progress.Value = 70;
 
-            string exePath = Path.Combine(installPath, "KrakenPad.exe");
+            string exePath = Path.Combine(installPath, "NoteKraken.exe");
             string iconPath = Path.Combine(installPath, "kraken_transparent.ico");
 
             // Create shortcuts
             if (_desktopShortcut.Checked)
             {
-                string desktopPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "Kraken Pad.lnk");
+                string desktopPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "Note Kraken.lnk");
                 CreateShortcut(desktopPath, exePath, iconPath);
             }
             _progress.Value = 80;
@@ -298,10 +298,10 @@ public class InstallerForm : Form
             {
                 string startMenuPath = Path.Combine(
                     Environment.GetFolderPath(Environment.SpecialFolder.StartMenu),
-                    "Programs", "Kraken Pad"
+                    "Programs", "Note Kraken"
                 );
                 Directory.CreateDirectory(startMenuPath);
-                CreateShortcut(Path.Combine(startMenuPath, "Kraken Pad.lnk"), exePath, iconPath);
+                CreateShortcut(Path.Combine(startMenuPath, "Note Kraken.lnk"), exePath, iconPath);
             }
             _progress.Value = 90;
 
@@ -313,7 +313,7 @@ public class InstallerForm : Form
             CreateUninstallEntry(installPath);
 
             MessageBox.Show(
-                "Kraken Pad has been installed successfully!\n\n" +
+                "Note Kraken has been installed successfully!\n\n" +
                 $"Location: {installPath}\n\n" +
                 "You can set it as your default text editor in:\n" +
                 "Settings → Apps → Default apps",
@@ -323,7 +323,7 @@ public class InstallerForm : Form
             );
 
             // Offer to launch
-            if (MessageBox.Show("Would you like to launch Kraken Pad now?", "Launch", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            if (MessageBox.Show("Would you like to launch Note Kraken now?", "Launch", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
                 Process.Start(new ProcessStartInfo
                 {
@@ -359,56 +359,56 @@ public class InstallerForm : Form
 
     private void RegisterApplication(string installPath)
     {
-        string exePath = Path.Combine(installPath, "KrakenPad.exe");
+        string exePath = Path.Combine(installPath, "NoteKraken.exe");
         string iconPath = Path.Combine(installPath, "kraken_transparent.ico");
 
         // Register capabilities
-        using (var key = Registry.CurrentUser.CreateSubKey(@"Software\KrakenPad\Capabilities"))
+        using (var key = Registry.CurrentUser.CreateSubKey(@"Software\NoteKraken\Capabilities"))
         {
-            key.SetValue("ApplicationName", "Kraken Pad");
+            key.SetValue("ApplicationName", "Note Kraken");
             key.SetValue("ApplicationDescription", "A fast, simple text editor. No bloat, no AI, just text.");
         }
 
-        using (var key = Registry.CurrentUser.CreateSubKey(@"Software\KrakenPad\Capabilities\FileAssociations"))
+        using (var key = Registry.CurrentUser.CreateSubKey(@"Software\NoteKraken\Capabilities\FileAssociations"))
         {
-            key.SetValue(".txt", "KrakenPad.TextFile");
-            key.SetValue(".log", "KrakenPad.TextFile");
-            key.SetValue(".ini", "KrakenPad.TextFile");
-            key.SetValue(".cfg", "KrakenPad.TextFile");
-            key.SetValue(".md", "KrakenPad.TextFile");
+            key.SetValue(".txt", "NoteKraken.TextFile");
+            key.SetValue(".log", "NoteKraken.TextFile");
+            key.SetValue(".ini", "NoteKraken.TextFile");
+            key.SetValue(".cfg", "NoteKraken.TextFile");
+            key.SetValue(".md", "NoteKraken.TextFile");
         }
 
         // Register with Windows
         using (var key = Registry.CurrentUser.CreateSubKey(@"Software\RegisteredApplications"))
         {
-            key.SetValue("KrakenPad", @"Software\KrakenPad\Capabilities");
+            key.SetValue("NoteKraken", @"Software\NoteKraken\Capabilities");
         }
 
         // Register file type
-        using (var key = Registry.CurrentUser.CreateSubKey(@"Software\Classes\KrakenPad.TextFile"))
+        using (var key = Registry.CurrentUser.CreateSubKey(@"Software\Classes\NoteKraken.TextFile"))
         {
             key.SetValue("", "Text File");
             key.SetValue("FriendlyTypeName", "Text File");
         }
-        using (var key = Registry.CurrentUser.CreateSubKey(@"Software\Classes\KrakenPad.TextFile\DefaultIcon"))
+        using (var key = Registry.CurrentUser.CreateSubKey(@"Software\Classes\NoteKraken.TextFile\DefaultIcon"))
         {
             key.SetValue("", iconPath);
         }
-        using (var key = Registry.CurrentUser.CreateSubKey(@"Software\Classes\KrakenPad.TextFile\shell\open\command"))
+        using (var key = Registry.CurrentUser.CreateSubKey(@"Software\Classes\NoteKraken.TextFile\shell\open\command"))
         {
             key.SetValue("", $"\"{exePath}\" \"%1\"");
         }
 
         // Register in Applications
-        using (var key = Registry.CurrentUser.CreateSubKey(@"Software\Classes\Applications\KrakenPad.exe"))
+        using (var key = Registry.CurrentUser.CreateSubKey(@"Software\Classes\Applications\NoteKraken.exe"))
         {
-            key.SetValue("FriendlyAppName", "Kraken Pad");
+            key.SetValue("FriendlyAppName", "Note Kraken");
         }
-        using (var key = Registry.CurrentUser.CreateSubKey(@"Software\Classes\Applications\KrakenPad.exe\shell\open\command"))
+        using (var key = Registry.CurrentUser.CreateSubKey(@"Software\Classes\Applications\NoteKraken.exe\shell\open\command"))
         {
             key.SetValue("", $"\"{exePath}\" \"%1\"");
         }
-        using (var key = Registry.CurrentUser.CreateSubKey(@"Software\Classes\Applications\KrakenPad.exe\SupportedTypes"))
+        using (var key = Registry.CurrentUser.CreateSubKey(@"Software\Classes\Applications\NoteKraken.exe\SupportedTypes"))
         {
             key.SetValue(".txt", "");
             key.SetValue(".log", "");
@@ -429,22 +429,22 @@ public class InstallerForm : Form
         foreach (var ext in associations)
         {
             using var key = Registry.CurrentUser.CreateSubKey($@"Software\Classes\{ext}\OpenWithProgids");
-            key.SetValue("KrakenPad.TextFile", "");
+            key.SetValue("NoteKraken.TextFile", "");
         }
     }
 
     private void CreateUninstallEntry(string installPath)
     {
-        string exePath = Path.Combine(installPath, "KrakenPad.exe");
+        string exePath = Path.Combine(installPath, "NoteKraken.exe");
         string iconPath = Path.Combine(installPath, "kraken_transparent.ico");
 
-        using var key = Registry.CurrentUser.CreateSubKey(@"Software\Microsoft\Windows\CurrentVersion\Uninstall\KrakenPad");
-        key.SetValue("DisplayName", "Kraken Pad");
+        using var key = Registry.CurrentUser.CreateSubKey(@"Software\Microsoft\Windows\CurrentVersion\Uninstall\NoteKraken");
+        key.SetValue("DisplayName", "Note Kraken");
         key.SetValue("DisplayIcon", iconPath);
         key.SetValue("DisplayVersion", "1.0");
         key.SetValue("Publisher", "Kraken Software");
         key.SetValue("InstallLocation", installPath);
-        key.SetValue("UninstallString", $"powershell -ExecutionPolicy Bypass -Command \"Remove-Item -Recurse -Force '{installPath}'; Remove-Item 'HKCU:\\Software\\KrakenPad' -Recurse -ErrorAction SilentlyContinue; Remove-Item 'HKCU:\\Software\\Classes\\KrakenPad.TextFile' -Recurse -ErrorAction SilentlyContinue; Remove-Item 'HKCU:\\Software\\Classes\\Applications\\KrakenPad.exe' -Recurse -ErrorAction SilentlyContinue; Remove-ItemProperty 'HKCU:\\Software\\RegisteredApplications' -Name 'KrakenPad' -ErrorAction SilentlyContinue; Remove-Item 'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\KrakenPad' -Recurse\"");
+        key.SetValue("UninstallString", $"powershell -ExecutionPolicy Bypass -Command \"Remove-Item -Recurse -Force '{installPath}'; Remove-Item 'HKCU:\\Software\\NoteKraken' -Recurse -ErrorAction SilentlyContinue; Remove-Item 'HKCU:\\Software\\Classes\\NoteKraken.TextFile' -Recurse -ErrorAction SilentlyContinue; Remove-Item 'HKCU:\\Software\\Classes\\Applications\\NoteKraken.exe' -Recurse -ErrorAction SilentlyContinue; Remove-ItemProperty 'HKCU:\\Software\\RegisteredApplications' -Name 'NoteKraken' -ErrorAction SilentlyContinue; Remove-Item 'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\NoteKraken' -Recurse\"");
         key.SetValue("NoModify", 1);
         key.SetValue("NoRepair", 1);
     }

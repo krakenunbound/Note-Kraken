@@ -1,6 +1,6 @@
 using System.Runtime.InteropServices;
 
-namespace KrakenPad;
+namespace NoteKraken;
 
 public partial class FindReplaceForm : Form
 {

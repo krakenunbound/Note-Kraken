@@ -6,8 +6,8 @@
     <UseWindowsForms>true</UseWindowsForms>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>kraken_transparent.ico</ApplicationIcon>
-    <AssemblyName>KrakenPad</AssemblyName>
-    <RootNamespace>KrakenPad</RootNamespace>
+    <AssemblyName>NoteKraken</AssemblyName>
+    <RootNamespace>NoteKraken</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>

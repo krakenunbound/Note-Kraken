@@ -1,7 +1,7 @@
 using System.Runtime.InteropServices;
 using Microsoft.Win32;
 
-namespace KrakenPad;
+namespace NoteKraken;
 
 public partial class MainForm : Form
 {
@@ -124,7 +124,7 @@ public partial class MainForm : Form
     {
         string fileName = string.IsNullOrEmpty(_currentFile) ? "Untitled" : Path.GetFileName(_currentFile);
         string dirty = _isDirty ? " *" : "";
-        Text = $"{fileName}{dirty} - Kraken Pad";
+        Text = $"{fileName}{dirty} - Note Kraken";
     }
 
     private void UpdatePosition()
@@ -155,7 +155,7 @@ public partial class MainForm : Form
 
         var result = MessageBox.Show(
             "Do you want to save changes?",
-            "Kraken Pad",
+            "Note Kraken",
             MessageBoxButtons.YesNoCancel,
             MessageBoxIcon.Question);
 
@@ -328,8 +328,8 @@ public partial class MainForm : Form
     private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
     {
         MessageBox.Show(
-            "Kraken Pad\n\nA fast, simple text editor.\nNo bloat, no AI, just text.",
-            "About Kraken Pad",
+            "Note Kraken\n\nA fast, simple text editor.\nNo bloat, no AI, just text.",
+            "About Note Kraken",
             MessageBoxButtons.OK,
             MessageBoxIcon.Information);
     }

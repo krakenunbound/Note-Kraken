@@ -1,4 +1,4 @@
-namespace KrakenPadInstaller;
+namespace NoteKrakenInstaller;
 
 static class Program
 {

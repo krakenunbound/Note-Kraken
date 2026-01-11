@@ -1,4 +1,4 @@
-namespace KrakenPad;
+namespace NoteKraken;
 
 static class Program
 {

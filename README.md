@@ -1,8 +1,8 @@
-# Kraken Pad
+# Note Kraken
 
 A fast, simple text editor for Windows. No bloat, no AI, just text.
 
-![Kraken Pad Screenshot](screenshots/kraken_pad.png)
+![Note Kraken Screenshot](screenshots/kraken_pad.png)
 
 ## Features
 
@@ -34,10 +34,10 @@ A fast, simple text editor for Windows. No bloat, no AI, just text.
 ## Installation
 
 ### Option 1: Download the Installer
-Download `KrakenPad_Setup.exe` from the [Releases](../../releases) page and run it.
+Download `NoteKraken_Setup.exe` from the [Releases](../../releases) page and run it.
 
 The installer will:
-- Install Kraken Pad to your chosen location
+- Install Note Kraken to your chosen location
 - Create Start Menu and Desktop shortcuts (optional)
 - Register file associations (optional)
 - Show up in Windows "Default apps" settings
@@ -47,27 +47,32 @@ Requires [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
 
 ```bash
 # Clone the repo
-git clone https://github.com/YOUR_USERNAME/Kraken-Pad.git
-cd Kraken-Pad
+git clone https://github.com/krakenunbound/Note-Kraken.git
+cd Note-Kraken
 
 # Build the app
 dotnet build -c Release
 
 # Or publish for distribution
-dotnet publish -c Release -o publish
+dotnet publish NoteKraken.csproj -c Release -o publish
 ```
 
 ### Building the Installer
 ```bash
-cd Installer
-dotnet publish -c Release -r win-x64 --self-contained true -o ../installer_output
+# First build the main app
+dotnet publish NoteKraken.csproj -c Release -o release_build
+cp kraken_transparent.ico release_build/
+
+# Then build the installer
+cd src/Installer
+dotnet publish -c Release -r win-x64 --self-contained true -o ../../release_installer
 ```
 
 ## Why?
 
 Microsoft decided to turn Notepad into a bloated "modern" app with AI features. Some of us just want to quickly edit a text file without waiting for it to load, without AI suggestions, without cloud sync.
 
-Kraken Pad is what Notepad should have stayed: fast, simple, and focused.
+Note Kraken is what Notepad should have stayed: fast, simple, and focused.
 
 ## License
 
