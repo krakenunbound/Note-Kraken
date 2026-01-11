@@ -1,0 +1,20 @@
+# Build outputs
+bin/
+obj/
+publish/
+publish2/
+publish3/
+installer_output/
+
+# IDE
+.vs/
+.vscode/
+*.user
+*.suo
+
+# Claude
+.claude/
+
+# OS
+Thumbs.db
+.DS_Store

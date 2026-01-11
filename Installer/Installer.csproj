@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ApplicationIcon>..\kraken_transparent.ico</ApplicationIcon>
+    <AssemblyName>KrakenPad_Setup</AssemblyName>
+    <RootNamespace>KrakenPadInstaller</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>true</SelfContained>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="..\publish3\KrakenPad.exe" LogicalName="KrakenPad.exe" />
+    <EmbeddedResource Include="..\publish3\KrakenPad.dll" LogicalName="KrakenPad.dll" />
+    <EmbeddedResource Include="..\publish3\KrakenPad.deps.json" LogicalName="KrakenPad.deps.json" />
+    <EmbeddedResource Include="..\publish3\KrakenPad.runtimeconfig.json" LogicalName="KrakenPad.runtimeconfig.json" />
+    <EmbeddedResource Include="..\kraken_transparent.ico" LogicalName="kraken_transparent.ico" />
+  </ItemGroup>
+
+</Project>
