@@ -5,6 +5,8 @@ publish/
 publish2/
 publish3/
 installer_output/
+release_build/
+release_installer/
 
 # IDE
 .vs/
