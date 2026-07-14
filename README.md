@@ -1,79 +1,100 @@
 # Note Kraken
 
-A fast, simple text editor for Windows. No bloat, no AI, just text.
+Note Kraken is a fast, focused Windows text editor: no accounts, cloud sync, telemetry, AI, or plugin system—just the useful parts of classic Notepad.
 
-![Note Kraken Screenshot](screenshots/kraken_pad.png)
+![Note Kraken icon](assets/note-kraken.png)
+
+## Screenshots
+
+### Editor
+
+![Note Kraken editor showing encoding, line endings, zoom, and cursor position](docs/screenshots/note-kraken-editor.png)
+
+### Find and replace
+
+![Note Kraken Find and Replace dialog](docs/screenshots/note-kraken-find-replace.png)
+
+### Installer and file associations
+
+![Note Kraken installer with shortcut and file-association choices](docs/screenshots/note-kraken-installer.png)
 
 ## Features
 
-- **Fast** - Native Windows app, instant startup
-- **Simple** - Just the basics: New, Open, Save, Find/Replace
-- **Dark/Light theme** - Automatically matches your Windows theme
-- **Lightweight** - ~200KB (requires .NET 8 runtime)
-- **Keyboard shortcuts** - All the standards work (Ctrl+S, Ctrl+F, etc.)
-- **Drag & drop** - Drop files onto the window to open them
-- **File associations** - Can be set as default for .txt files
+- Native Windows Forms application with quick startup
+- Distinct warm graphite-and-amber theme that follows the Windows light/dark setting
+- New, new window, open, save, and save as
+- Unsaved-change protection when closing, opening, creating, or dropping another file
+- Undo, redo, cut, copy, paste, delete, and select all
+- Complete right-click editing menu with commands enabled only when applicable
+- Find and replace with match case, whole word, direction, and wrap-around options
+- Find next (`F3`), go to line, and insert time/date (`F5`)
+- Word wrap and user-selectable editor font
+- Zoom from 50% to 500%
+- Page setup and printing
+- Drag-and-drop file opening
+- Status bar with cursor position, zoom, encoding, and line-ending style
+- Preserves UTF-8, UTF-8 BOM, UTF-16, UTF-32, and Windows-1252 text when opening files
+- Selectable UTF-8, UTF-8 BOM, UTF-16 LE, or Windows-1252 output
+- Selectable Windows (CRLF), Unix (LF), or classic Mac (CR) line endings
+- Self-contained 64-bit Windows build; no separate .NET runtime installation required
 
-## Keyboard Shortcuts
+## Keyboard shortcuts
 
 | Shortcut | Action |
-|----------|--------|
-| Ctrl+N | New file |
-| Ctrl+O | Open file |
-| Ctrl+S | Save |
-| Ctrl+Shift+S | Save As |
-| Ctrl+Z | Undo |
-| Ctrl+X | Cut |
-| Ctrl+C | Copy |
-| Ctrl+V | Paste |
-| Ctrl+A | Select All |
-| Ctrl+F | Find |
-| Ctrl+H | Replace |
-| Ctrl+G | Go to Line |
+|---|---|
+| `Ctrl+N` | New file |
+| `Ctrl+Shift+N` | New window |
+| `Ctrl+O` | Open |
+| `Ctrl+S` | Save |
+| `Ctrl+Shift+S` | Save as |
+| `Ctrl+P` | Print |
+| `Ctrl+Z` / `Ctrl+Y` | Undo / redo |
+| `Ctrl+X` / `Ctrl+C` / `Ctrl+V` | Cut / copy / paste |
+| `Delete` | Delete selection |
+| `Ctrl+F` / `F3` | Find / find next |
+| `Ctrl+H` | Replace |
+| `Ctrl+G` | Go to line (when word wrap is off) |
+| `Ctrl+A` | Select all |
+| `F5` | Insert time and date |
+| `Ctrl++` / `Ctrl+-` / `Ctrl+0` | Zoom in / out / reset |
 
-## Installation
+## Install
 
-### Option 1: Download the Installer
-Download `NoteKraken_Setup.exe` from the [Releases](../../releases) page and run it.
+Run `NoteKraken_Setup_1.1.0.exe` from the `release_installer` folder.
 
-The installer will:
-- Install Note Kraken to your chosen location
-- Create Start Menu and Desktop shortcuts (optional)
-- Register file associations (optional)
-- Show up in Windows "Default apps" settings
+The installer can create desktop and Start Menu shortcuts and register Note Kraken with Windows Default Apps/Open With for:
 
-### Option 2: Build from Source
-Requires [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+- `.txt`
+- `.log`
+- `.ini` and `.cfg`
+- `.md`
 
-```bash
-# Clone the repo
-git clone https://github.com/krakenunbound/Note-Kraken.git
-cd Note-Kraken
+Windows controls the final choice of default application and may ask for confirmation the first time a file type is opened.
 
-# Build the app
-dotnet build -c Release
+Release binaries are Authenticode-signed and RFC 3161 timestamped. The current `Kraken Unbound` certificate is a machine-local development certificate, not a certificate issued by a public certification authority. It verifies as trusted on the creator's workstation, but other computers can still show an unknown-publisher or SmartScreen warning. See [SIGNING.md](SIGNING.md).
 
-# Or publish for distribution
-dotnet publish NoteKraken.csproj -c Release -o publish
+## Build from source
+
+Requires the .NET 8 SDK on Windows.
+
+```powershell
+dotnet build .\NoteKraken.sln -c Release
+dotnet publish .\NoteKraken.csproj -c Release -r win-x64 --self-contained true -o .\release_build
+dotnet publish .\src\Installer\Installer.csproj -c Release -r win-x64 --self-contained true -o .\release_installer
 ```
 
-### Building the Installer
-```bash
-# First build the main app
-dotnet publish NoteKraken.csproj -c Release -o release_build
-cp kraken_transparent.ico release_build/
+The installer project embeds the already-published `release_build\NoteKraken.exe`, so publish the editor first.
 
-# Then build the installer
-cd src/Installer
-dotnet publish -c Release -r win-x64 --self-contained true -o ../../release_installer
+For a reproducible signed build on a workstation that has an appropriate code-signing certificate:
+
+```powershell
+.\scripts\Build-SignedRelease.ps1 -CertificateThumbprint YOUR_CERTIFICATE_THUMBPRINT
 ```
 
-## Why?
+## Philosophy
 
-Microsoft decided to turn Notepad into a bloated "modern" app with AI features. Some of us just want to quickly edit a text file without waiting for it to load, without AI suggestions, without cloud sync.
-
-Note Kraken is what Notepad should have stayed: fast, simple, and focused.
+Note Kraken intentionally does not include AI, cloud services, collaboration, extensions, syntax intelligence, or other IDE features. Those belong in larger editors. Note Kraken exists to open, edit, print, and save plain text reliably.
 
 ## License
 
-MIT License - do whatever you want with it.
+MIT License — Copyright © 2026 The Kraken (Kraken Unbound)

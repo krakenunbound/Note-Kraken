@@ -4,17 +4,35 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
+    <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <ApplicationIcon>kraken_transparent.ico</ApplicationIcon>
+    <ApplicationIcon>assets\note-kraken.ico</ApplicationIcon>
     <AssemblyName>NoteKraken</AssemblyName>
     <RootNamespace>NoteKraken</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <Version>1.1.0</Version>
+    <AssemblyVersion>1.1.0.0</AssemblyVersion>
+    <FileVersion>1.1.0.0</FileVersion>
+    <Product>Note Kraken</Product>
+    <AssemblyTitle>Note Kraken</AssemblyTitle>
+    <Company>Kraken Unbound</Company>
+    <Authors>The Kraken</Authors>
+    <Description>A fast, focused text editor for Windows.</Description>
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>true</SelfContained>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <PublishTrimmed>false</PublishTrimmed>
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Include="*.cs" />
+    <EmbeddedResource Include="assets\note-kraken.ico" LogicalName="note-kraken.ico" />
   </ItemGroup>
 
 </Project>
