@@ -2,313 +2,275 @@ namespace NoteKraken;
 
 partial class MainForm
 {
-    private System.ComponentModel.IContainer components = null;
+    private System.ComponentModel.IContainer components = null!;
 
     protected override void Dispose(bool disposing)
     {
-        if (disposing && (components != null))
+        if (disposing)
         {
-            components.Dispose();
+            components?.Dispose();
+            _printDocument.Dispose();
         }
         base.Dispose(disposing);
     }
 
-    #region Windows Form Designer generated code
-
     private void InitializeComponent()
     {
-        this.menuStrip = new MenuStrip();
-        this.fileMenu = new ToolStripMenuItem();
-        this.newToolStripMenuItem = new ToolStripMenuItem();
-        this.openToolStripMenuItem = new ToolStripMenuItem();
-        this.saveToolStripMenuItem = new ToolStripMenuItem();
-        this.saveAsToolStripMenuItem = new ToolStripMenuItem();
-        this.toolStripSeparator1 = new ToolStripSeparator();
-        this.exitToolStripMenuItem = new ToolStripMenuItem();
-        this.editMenu = new ToolStripMenuItem();
-        this.undoToolStripMenuItem = new ToolStripMenuItem();
-        this.toolStripSeparator2 = new ToolStripSeparator();
-        this.cutToolStripMenuItem = new ToolStripMenuItem();
-        this.copyToolStripMenuItem = new ToolStripMenuItem();
-        this.pasteToolStripMenuItem = new ToolStripMenuItem();
-        this.toolStripSeparator3 = new ToolStripSeparator();
-        this.selectAllToolStripMenuItem = new ToolStripMenuItem();
-        this.toolStripSeparator4 = new ToolStripSeparator();
-        this.findToolStripMenuItem = new ToolStripMenuItem();
-        this.replaceToolStripMenuItem = new ToolStripMenuItem();
-        this.goToToolStripMenuItem = new ToolStripMenuItem();
-        this.viewMenu = new ToolStripMenuItem();
-        this.wordWrapToolStripMenuItem = new ToolStripMenuItem();
-        this.helpMenu = new ToolStripMenuItem();
-        this.aboutToolStripMenuItem = new ToolStripMenuItem();
-        this.statusStrip = new StatusStrip();
-        this.lblStatus = new ToolStripStatusLabel();
-        this.lblPosition = new ToolStripStatusLabel();
-        this.txtEditor = new RichTextBox();
-        this.menuStrip.SuspendLayout();
-        this.statusStrip.SuspendLayout();
-        this.SuspendLayout();
+        components = new System.ComponentModel.Container();
+        menuStrip = new MenuStrip();
+        fileMenu = new ToolStripMenuItem("&File");
+        newToolStripMenuItem = new ToolStripMenuItem("&New", null, newToolStripMenuItem_Click, Keys.Control | Keys.N);
+        newWindowToolStripMenuItem = new ToolStripMenuItem("New &Window", null, newWindowToolStripMenuItem_Click, Keys.Control | Keys.Shift | Keys.N);
+        openToolStripMenuItem = new ToolStripMenuItem("&Open...", null, openToolStripMenuItem_Click, Keys.Control | Keys.O);
+        saveToolStripMenuItem = new ToolStripMenuItem("&Save", null, saveToolStripMenuItem_Click, Keys.Control | Keys.S);
+        saveAsToolStripMenuItem = new ToolStripMenuItem("Save &As...", null, saveAsToolStripMenuItem_Click, Keys.Control | Keys.Shift | Keys.S);
+        pageSetupToolStripMenuItem = new ToolStripMenuItem("Page Set&up...", null, pageSetupToolStripMenuItem_Click);
+        printToolStripMenuItem = new ToolStripMenuItem("&Print...", null, printToolStripMenuItem_Click, Keys.Control | Keys.P);
+        exitToolStripMenuItem = new ToolStripMenuItem("E&xit", null, exitToolStripMenuItem_Click, Keys.Alt | Keys.F4);
 
-        // menuStrip
-        this.menuStrip.Items.AddRange(new ToolStripItem[] {
-            this.fileMenu,
-            this.editMenu,
-            this.viewMenu,
-            this.helpMenu});
-        this.menuStrip.Location = new Point(0, 0);
-        this.menuStrip.Name = "menuStrip";
-        this.menuStrip.Size = new Size(800, 24);
-        this.menuStrip.TabIndex = 0;
+        editMenu = new ToolStripMenuItem("&Edit");
+        undoToolStripMenuItem = new ToolStripMenuItem("&Undo", null, undoToolStripMenuItem_Click, Keys.Control | Keys.Z);
+        redoToolStripMenuItem = new ToolStripMenuItem("&Redo", null, redoToolStripMenuItem_Click, Keys.Control | Keys.Y);
+        cutToolStripMenuItem = new ToolStripMenuItem("Cu&t", null, cutToolStripMenuItem_Click, Keys.Control | Keys.X);
+        copyToolStripMenuItem = new ToolStripMenuItem("&Copy", null, copyToolStripMenuItem_Click, Keys.Control | Keys.C);
+        pasteToolStripMenuItem = new ToolStripMenuItem("&Paste", null, pasteToolStripMenuItem_Click, Keys.Control | Keys.V);
+        deleteToolStripMenuItem = new ToolStripMenuItem("&Delete", null, deleteToolStripMenuItem_Click, Keys.Delete);
+        findToolStripMenuItem = new ToolStripMenuItem("&Find...", null, findToolStripMenuItem_Click, Keys.Control | Keys.F);
+        findNextToolStripMenuItem = new ToolStripMenuItem("Find &Next", null, findNextToolStripMenuItem_Click, Keys.F3);
+        replaceToolStripMenuItem = new ToolStripMenuItem("&Replace...", null, replaceToolStripMenuItem_Click, Keys.Control | Keys.H);
+        goToToolStripMenuItem = new ToolStripMenuItem("&Go To...", null, goToToolStripMenuItem_Click, Keys.Control | Keys.G);
+        selectAllToolStripMenuItem = new ToolStripMenuItem("Select &All", null, selectAllToolStripMenuItem_Click, Keys.Control | Keys.A);
+        timeDateToolStripMenuItem = new ToolStripMenuItem("Time/&Date", null, timeDateToolStripMenuItem_Click, Keys.F5);
 
-        // fileMenu
-        this.fileMenu.DropDownItems.AddRange(new ToolStripItem[] {
-            this.newToolStripMenuItem,
-            this.openToolStripMenuItem,
-            this.saveToolStripMenuItem,
-            this.saveAsToolStripMenuItem,
-            this.toolStripSeparator1,
-            this.exitToolStripMenuItem});
-        this.fileMenu.Name = "fileMenu";
-        this.fileMenu.Size = new Size(37, 20);
-        this.fileMenu.Text = "&File";
+        formatMenu = new ToolStripMenuItem("F&ormat");
+        wordWrapToolStripMenuItem = new ToolStripMenuItem("&Word Wrap", null, wordWrapToolStripMenuItem_Click) { Checked = true, CheckOnClick = false };
+        fontToolStripMenuItem = new ToolStripMenuItem("&Font...", null, fontToolStripMenuItem_Click);
+        encodingMenu = new ToolStripMenuItem("&Encoding");
+        utf8ToolStripMenuItem = new ToolStripMenuItem("UTF-&8", null, utf8ToolStripMenuItem_Click) { Checked = true };
+        utf8BomToolStripMenuItem = new ToolStripMenuItem("UTF-8 with &BOM", null, utf8BomToolStripMenuItem_Click);
+        utf16ToolStripMenuItem = new ToolStripMenuItem("UTF-1&6 LE", null, utf16ToolStripMenuItem_Click);
+        ansiToolStripMenuItem = new ToolStripMenuItem("&ANSI (Windows-1252)", null, ansiToolStripMenuItem_Click);
+        lineEndingsMenu = new ToolStripMenuItem("&Line Endings");
+        windowsLineEndingsToolStripMenuItem = new ToolStripMenuItem("&Windows (CRLF)", null, windowsLineEndingsToolStripMenuItem_Click) { Checked = true };
+        unixLineEndingsToolStripMenuItem = new ToolStripMenuItem("&Unix (LF)", null, unixLineEndingsToolStripMenuItem_Click);
+        macLineEndingsToolStripMenuItem = new ToolStripMenuItem("Classic &Mac (CR)", null, macLineEndingsToolStripMenuItem_Click);
 
-        // newToolStripMenuItem
-        this.newToolStripMenuItem.Name = "newToolStripMenuItem";
-        this.newToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.N;
-        this.newToolStripMenuItem.Size = new Size(186, 22);
-        this.newToolStripMenuItem.Text = "&New";
-        this.newToolStripMenuItem.Click += new EventHandler(this.newToolStripMenuItem_Click);
+        viewMenu = new ToolStripMenuItem("&View");
+        zoomMenu = new ToolStripMenuItem("&Zoom");
+        zoomInToolStripMenuItem = new ToolStripMenuItem("Zoom &In", null, zoomInToolStripMenuItem_Click, Keys.Control | Keys.Oemplus);
+        zoomOutToolStripMenuItem = new ToolStripMenuItem("Zoom &Out", null, zoomOutToolStripMenuItem_Click, Keys.Control | Keys.OemMinus);
+        restoreZoomToolStripMenuItem = new ToolStripMenuItem("Restore Default Zoom", null, restoreZoomToolStripMenuItem_Click, Keys.Control | Keys.D0);
+        statusBarToolStripMenuItem = new ToolStripMenuItem("&Status Bar", null, statusBarToolStripMenuItem_Click) { Checked = true };
 
-        // openToolStripMenuItem
-        this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-        this.openToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.O;
-        this.openToolStripMenuItem.Size = new Size(186, 22);
-        this.openToolStripMenuItem.Text = "&Open...";
-        this.openToolStripMenuItem.Click += new EventHandler(this.openToolStripMenuItem_Click);
+        helpMenu = new ToolStripMenuItem("&Help");
+        aboutToolStripMenuItem = new ToolStripMenuItem("&About Note Kraken", null, aboutToolStripMenuItem_Click);
 
-        // saveToolStripMenuItem
-        this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-        this.saveToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.S;
-        this.saveToolStripMenuItem.Size = new Size(186, 22);
-        this.saveToolStripMenuItem.Text = "&Save";
-        this.saveToolStripMenuItem.Click += new EventHandler(this.saveToolStripMenuItem_Click);
+        statusStrip = new StatusStrip();
+        lblStatus = new ToolStripStatusLabel("Ready") { Spring = true, TextAlign = ContentAlignment.MiddleLeft };
+        lblEncoding = new ToolStripStatusLabel("UTF-8") { BorderSides = ToolStripStatusLabelBorderSides.Left, Padding = new Padding(8, 0, 8, 0) };
+        lblLineEnding = new ToolStripStatusLabel("Windows (CRLF)") { BorderSides = ToolStripStatusLabelBorderSides.Left, Padding = new Padding(8, 0, 8, 0) };
+        lblZoom = new ToolStripStatusLabel("100%") { BorderSides = ToolStripStatusLabelBorderSides.Left, Padding = new Padding(8, 0, 8, 0) };
+        lblPosition = new ToolStripStatusLabel("Ln 1, Col 1") { BorderSides = ToolStripStatusLabelBorderSides.Left, Padding = new Padding(8, 0, 4, 0) };
 
-        // saveAsToolStripMenuItem
-        this.saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
-        this.saveAsToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.Shift | Keys.S;
-        this.saveAsToolStripMenuItem.Size = new Size(186, 22);
-        this.saveAsToolStripMenuItem.Text = "Save &As...";
-        this.saveAsToolStripMenuItem.Click += new EventHandler(this.saveAsToolStripMenuItem_Click);
+        editorContextMenu = new ContextMenuStrip(components);
+        ctxUndo = new ToolStripMenuItem("&Undo", null, undoToolStripMenuItem_Click);
+        ctxRedo = new ToolStripMenuItem("&Redo", null, redoToolStripMenuItem_Click);
+        ctxCut = new ToolStripMenuItem("Cu&t", null, cutToolStripMenuItem_Click);
+        ctxCopy = new ToolStripMenuItem("&Copy", null, copyToolStripMenuItem_Click);
+        ctxPaste = new ToolStripMenuItem("&Paste", null, pasteToolStripMenuItem_Click);
+        ctxDelete = new ToolStripMenuItem("&Delete", null, deleteToolStripMenuItem_Click);
+        ctxSelectAll = new ToolStripMenuItem("Select &All", null, selectAllToolStripMenuItem_Click);
 
-        // toolStripSeparator1
-        this.toolStripSeparator1.Name = "toolStripSeparator1";
-        this.toolStripSeparator1.Size = new Size(183, 6);
+        txtEditor = new RichTextBox();
 
-        // exitToolStripMenuItem
-        this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-        this.exitToolStripMenuItem.ShortcutKeys = Keys.Alt | Keys.F4;
-        this.exitToolStripMenuItem.Size = new Size(186, 22);
-        this.exitToolStripMenuItem.Text = "E&xit";
-        this.exitToolStripMenuItem.Click += new EventHandler(this.exitToolStripMenuItem_Click);
+        SuspendLayout();
+        menuStrip.SuspendLayout();
+        statusStrip.SuspendLayout();
 
-        // editMenu
-        this.editMenu.DropDownItems.AddRange(new ToolStripItem[] {
-            this.undoToolStripMenuItem,
-            this.toolStripSeparator2,
-            this.cutToolStripMenuItem,
-            this.copyToolStripMenuItem,
-            this.pasteToolStripMenuItem,
-            this.toolStripSeparator3,
-            this.selectAllToolStripMenuItem,
-            this.toolStripSeparator4,
-            this.findToolStripMenuItem,
-            this.replaceToolStripMenuItem,
-            this.goToToolStripMenuItem});
-        this.editMenu.Name = "editMenu";
-        this.editMenu.Size = new Size(39, 20);
-        this.editMenu.Text = "&Edit";
+        fileMenu.DropDownItems.AddRange(new ToolStripItem[]
+        {
+            newToolStripMenuItem,
+            newWindowToolStripMenuItem,
+            openToolStripMenuItem,
+            saveToolStripMenuItem,
+            saveAsToolStripMenuItem,
+            new ToolStripSeparator(),
+            pageSetupToolStripMenuItem,
+            printToolStripMenuItem,
+            new ToolStripSeparator(),
+            exitToolStripMenuItem
+        });
 
-        // undoToolStripMenuItem
-        this.undoToolStripMenuItem.Name = "undoToolStripMenuItem";
-        this.undoToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.Z;
-        this.undoToolStripMenuItem.Size = new Size(164, 22);
-        this.undoToolStripMenuItem.Text = "&Undo";
-        this.undoToolStripMenuItem.Click += new EventHandler(this.undoToolStripMenuItem_Click);
+        editMenu.DropDownItems.AddRange(new ToolStripItem[]
+        {
+            undoToolStripMenuItem,
+            redoToolStripMenuItem,
+            new ToolStripSeparator(),
+            cutToolStripMenuItem,
+            copyToolStripMenuItem,
+            pasteToolStripMenuItem,
+            deleteToolStripMenuItem,
+            new ToolStripSeparator(),
+            findToolStripMenuItem,
+            findNextToolStripMenuItem,
+            replaceToolStripMenuItem,
+            goToToolStripMenuItem,
+            new ToolStripSeparator(),
+            selectAllToolStripMenuItem,
+            timeDateToolStripMenuItem
+        });
+        editMenu.DropDownOpening += editMenu_DropDownOpening;
 
-        // toolStripSeparator2
-        this.toolStripSeparator2.Name = "toolStripSeparator2";
-        this.toolStripSeparator2.Size = new Size(161, 6);
+        encodingMenu.DropDownItems.AddRange(new ToolStripItem[]
+        {
+            utf8ToolStripMenuItem,
+            utf8BomToolStripMenuItem,
+            utf16ToolStripMenuItem,
+            ansiToolStripMenuItem
+        });
+        lineEndingsMenu.DropDownItems.AddRange(new ToolStripItem[]
+        {
+            windowsLineEndingsToolStripMenuItem,
+            unixLineEndingsToolStripMenuItem,
+            macLineEndingsToolStripMenuItem
+        });
+        formatMenu.DropDownItems.AddRange(new ToolStripItem[]
+        {
+            wordWrapToolStripMenuItem,
+            fontToolStripMenuItem,
+            new ToolStripSeparator(),
+            encodingMenu,
+            lineEndingsMenu
+        });
 
-        // cutToolStripMenuItem
-        this.cutToolStripMenuItem.Name = "cutToolStripMenuItem";
-        this.cutToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.X;
-        this.cutToolStripMenuItem.Size = new Size(164, 22);
-        this.cutToolStripMenuItem.Text = "Cu&t";
-        this.cutToolStripMenuItem.Click += new EventHandler(this.cutToolStripMenuItem_Click);
+        zoomMenu.DropDownItems.AddRange(new ToolStripItem[]
+        {
+            zoomInToolStripMenuItem,
+            zoomOutToolStripMenuItem,
+            restoreZoomToolStripMenuItem
+        });
+        viewMenu.DropDownItems.AddRange(new ToolStripItem[]
+        {
+            zoomMenu,
+            statusBarToolStripMenuItem
+        });
+        helpMenu.DropDownItems.Add(aboutToolStripMenuItem);
 
-        // copyToolStripMenuItem
-        this.copyToolStripMenuItem.Name = "copyToolStripMenuItem";
-        this.copyToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.C;
-        this.copyToolStripMenuItem.Size = new Size(164, 22);
-        this.copyToolStripMenuItem.Text = "&Copy";
-        this.copyToolStripMenuItem.Click += new EventHandler(this.copyToolStripMenuItem_Click);
+        menuStrip.Items.AddRange(new ToolStripItem[] { fileMenu, editMenu, formatMenu, viewMenu, helpMenu });
+        menuStrip.Dock = DockStyle.Top;
+        menuStrip.Name = "menuStrip";
+        menuStrip.TabIndex = 0;
 
-        // pasteToolStripMenuItem
-        this.pasteToolStripMenuItem.Name = "pasteToolStripMenuItem";
-        this.pasteToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.V;
-        this.pasteToolStripMenuItem.Size = new Size(164, 22);
-        this.pasteToolStripMenuItem.Text = "&Paste";
-        this.pasteToolStripMenuItem.Click += new EventHandler(this.pasteToolStripMenuItem_Click);
+        statusStrip.Items.AddRange(new ToolStripItem[] { lblStatus, lblEncoding, lblLineEnding, lblZoom, lblPosition });
+        statusStrip.Dock = DockStyle.Bottom;
+        statusStrip.Name = "statusStrip";
+        statusStrip.SizingGrip = true;
 
-        // toolStripSeparator3
-        this.toolStripSeparator3.Name = "toolStripSeparator3";
-        this.toolStripSeparator3.Size = new Size(161, 6);
+        editorContextMenu.Items.AddRange(new ToolStripItem[]
+        {
+            ctxUndo,
+            ctxRedo,
+            new ToolStripSeparator(),
+            ctxCut,
+            ctxCopy,
+            ctxPaste,
+            ctxDelete,
+            new ToolStripSeparator(),
+            ctxSelectAll
+        });
+        editorContextMenu.Opening += editorContextMenu_Opening;
 
-        // selectAllToolStripMenuItem
-        this.selectAllToolStripMenuItem.Name = "selectAllToolStripMenuItem";
-        this.selectAllToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.A;
-        this.selectAllToolStripMenuItem.Size = new Size(164, 22);
-        this.selectAllToolStripMenuItem.Text = "Select &All";
-        this.selectAllToolStripMenuItem.Click += new EventHandler(this.selectAllToolStripMenuItem_Click);
+        txtEditor.AcceptsTab = true;
+        txtEditor.ContextMenuStrip = editorContextMenu;
+        txtEditor.DetectUrls = false;
+        txtEditor.Dock = DockStyle.Fill;
+        txtEditor.HideSelection = false;
+        txtEditor.Name = "txtEditor";
+        txtEditor.ScrollBars = RichTextBoxScrollBars.Both;
+        txtEditor.WordWrap = true;
+        txtEditor.TextChanged += txtEditor_TextChanged;
+        txtEditor.SelectionChanged += txtEditor_SelectionChanged;
 
-        // toolStripSeparator4
-        this.toolStripSeparator4.Name = "toolStripSeparator4";
-        this.toolStripSeparator4.Size = new Size(161, 6);
+        AllowDrop = true;
+        AutoScaleDimensions = new SizeF(7F, 15F);
+        AutoScaleMode = AutoScaleMode.Font;
+        ClientSize = new Size(900, 600);
+        Controls.Add(txtEditor);
+        Controls.Add(statusStrip);
+        Controls.Add(menuStrip);
+        MainMenuStrip = menuStrip;
+        MinimumSize = new Size(420, 280);
+        Name = "MainForm";
+        StartPosition = FormStartPosition.CenterScreen;
+        Text = "Untitled - Note Kraken";
+        FormClosing += MainForm_FormClosing;
+        DragEnter += MainForm_DragEnter;
+        DragDrop += MainForm_DragDrop;
 
-        // findToolStripMenuItem
-        this.findToolStripMenuItem.Name = "findToolStripMenuItem";
-        this.findToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.F;
-        this.findToolStripMenuItem.Size = new Size(164, 22);
-        this.findToolStripMenuItem.Text = "&Find...";
-        this.findToolStripMenuItem.Click += new EventHandler(this.findToolStripMenuItem_Click);
-
-        // replaceToolStripMenuItem
-        this.replaceToolStripMenuItem.Name = "replaceToolStripMenuItem";
-        this.replaceToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.H;
-        this.replaceToolStripMenuItem.Size = new Size(164, 22);
-        this.replaceToolStripMenuItem.Text = "&Replace...";
-        this.replaceToolStripMenuItem.Click += new EventHandler(this.replaceToolStripMenuItem_Click);
-
-        // goToToolStripMenuItem
-        this.goToToolStripMenuItem.Name = "goToToolStripMenuItem";
-        this.goToToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.G;
-        this.goToToolStripMenuItem.Size = new Size(164, 22);
-        this.goToToolStripMenuItem.Text = "&Go To...";
-        this.goToToolStripMenuItem.Click += new EventHandler(this.goToToolStripMenuItem_Click);
-
-        // viewMenu
-        this.viewMenu.DropDownItems.AddRange(new ToolStripItem[] {
-            this.wordWrapToolStripMenuItem});
-        this.viewMenu.Name = "viewMenu";
-        this.viewMenu.Size = new Size(44, 20);
-        this.viewMenu.Text = "&View";
-
-        // wordWrapToolStripMenuItem
-        this.wordWrapToolStripMenuItem.Checked = true;
-        this.wordWrapToolStripMenuItem.CheckState = CheckState.Checked;
-        this.wordWrapToolStripMenuItem.Name = "wordWrapToolStripMenuItem";
-        this.wordWrapToolStripMenuItem.Size = new Size(134, 22);
-        this.wordWrapToolStripMenuItem.Text = "&Word Wrap";
-        this.wordWrapToolStripMenuItem.Click += new EventHandler(this.wordWrapToolStripMenuItem_Click);
-
-        // helpMenu
-        this.helpMenu.DropDownItems.AddRange(new ToolStripItem[] {
-            this.aboutToolStripMenuItem});
-        this.helpMenu.Name = "helpMenu";
-        this.helpMenu.Size = new Size(44, 20);
-        this.helpMenu.Text = "&Help";
-
-        // aboutToolStripMenuItem
-        this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-        this.aboutToolStripMenuItem.Size = new Size(107, 22);
-        this.aboutToolStripMenuItem.Text = "&About";
-        this.aboutToolStripMenuItem.Click += new EventHandler(this.aboutToolStripMenuItem_Click);
-
-        // statusStrip
-        this.statusStrip.Items.AddRange(new ToolStripItem[] {
-            this.lblStatus,
-            this.lblPosition});
-        this.statusStrip.Location = new Point(0, 428);
-        this.statusStrip.Name = "statusStrip";
-        this.statusStrip.Size = new Size(800, 22);
-        this.statusStrip.TabIndex = 1;
-
-        // lblStatus
-        this.lblStatus.Name = "lblStatus";
-        this.lblStatus.Size = new Size(694, 17);
-        this.lblStatus.Spring = true;
-        this.lblStatus.Text = "Ready";
-        this.lblStatus.TextAlign = ContentAlignment.MiddleLeft;
-
-        // lblPosition
-        this.lblPosition.Name = "lblPosition";
-        this.lblPosition.Size = new Size(91, 17);
-        this.lblPosition.Text = "Ln 1, Col 1";
-
-        // txtEditor
-        this.txtEditor.AcceptsTab = true;
-        this.txtEditor.Dock = DockStyle.Fill;
-        this.txtEditor.Location = new Point(0, 24);
-        this.txtEditor.Name = "txtEditor";
-        this.txtEditor.Size = new Size(800, 404);
-        this.txtEditor.TabIndex = 2;
-        this.txtEditor.Text = "";
-        this.txtEditor.WordWrap = true;
-        this.txtEditor.DetectUrls = false;
-        this.txtEditor.TextChanged += new EventHandler(this.txtEditor_TextChanged);
-        this.txtEditor.SelectionChanged += new EventHandler(this.txtEditor_SelectionChanged);
-
-        // MainForm
-        this.AllowDrop = true;
-        this.AutoScaleDimensions = new SizeF(7F, 15F);
-        this.AutoScaleMode = AutoScaleMode.Font;
-        this.ClientSize = new Size(800, 450);
-        this.Controls.Add(this.txtEditor);
-        this.Controls.Add(this.statusStrip);
-        this.Controls.Add(this.menuStrip);
-        this.MainMenuStrip = this.menuStrip;
-        this.Name = "MainForm";
-        this.StartPosition = FormStartPosition.CenterScreen;
-        this.Text = "Kraken Pad";
-        this.FormClosing += new FormClosingEventHandler(this.MainForm_FormClosing);
-        this.DragDrop += new DragEventHandler(this.MainForm_DragDrop);
-        this.DragEnter += new DragEventHandler(this.MainForm_DragEnter);
-        this.menuStrip.ResumeLayout(false);
-        this.menuStrip.PerformLayout();
-        this.statusStrip.ResumeLayout(false);
-        this.statusStrip.PerformLayout();
-        this.ResumeLayout(false);
-        this.PerformLayout();
+        menuStrip.ResumeLayout(false);
+        menuStrip.PerformLayout();
+        statusStrip.ResumeLayout(false);
+        statusStrip.PerformLayout();
+        ResumeLayout(false);
+        PerformLayout();
     }
 
-    #endregion
-
-    private MenuStrip menuStrip;
-    private ToolStripMenuItem fileMenu;
-    private ToolStripMenuItem newToolStripMenuItem;
-    private ToolStripMenuItem openToolStripMenuItem;
-    private ToolStripMenuItem saveToolStripMenuItem;
-    private ToolStripMenuItem saveAsToolStripMenuItem;
-    private ToolStripSeparator toolStripSeparator1;
-    private ToolStripMenuItem exitToolStripMenuItem;
-    private ToolStripMenuItem editMenu;
-    private ToolStripMenuItem undoToolStripMenuItem;
-    private ToolStripSeparator toolStripSeparator2;
-    private ToolStripMenuItem cutToolStripMenuItem;
-    private ToolStripMenuItem copyToolStripMenuItem;
-    private ToolStripMenuItem pasteToolStripMenuItem;
-    private ToolStripSeparator toolStripSeparator3;
-    private ToolStripMenuItem selectAllToolStripMenuItem;
-    private ToolStripSeparator toolStripSeparator4;
-    private ToolStripMenuItem findToolStripMenuItem;
-    private ToolStripMenuItem replaceToolStripMenuItem;
-    private ToolStripMenuItem goToToolStripMenuItem;
-    private ToolStripMenuItem viewMenu;
-    private ToolStripMenuItem wordWrapToolStripMenuItem;
-    private ToolStripMenuItem helpMenu;
-    private ToolStripMenuItem aboutToolStripMenuItem;
-    private StatusStrip statusStrip;
-    private ToolStripStatusLabel lblStatus;
-    private ToolStripStatusLabel lblPosition;
-    private RichTextBox txtEditor;
+    private MenuStrip menuStrip = null!;
+    private ToolStripMenuItem fileMenu = null!;
+    private ToolStripMenuItem newToolStripMenuItem = null!;
+    private ToolStripMenuItem newWindowToolStripMenuItem = null!;
+    private ToolStripMenuItem openToolStripMenuItem = null!;
+    private ToolStripMenuItem saveToolStripMenuItem = null!;
+    private ToolStripMenuItem saveAsToolStripMenuItem = null!;
+    private ToolStripMenuItem pageSetupToolStripMenuItem = null!;
+    private ToolStripMenuItem printToolStripMenuItem = null!;
+    private ToolStripMenuItem exitToolStripMenuItem = null!;
+    private ToolStripMenuItem editMenu = null!;
+    private ToolStripMenuItem undoToolStripMenuItem = null!;
+    private ToolStripMenuItem redoToolStripMenuItem = null!;
+    private ToolStripMenuItem cutToolStripMenuItem = null!;
+    private ToolStripMenuItem copyToolStripMenuItem = null!;
+    private ToolStripMenuItem pasteToolStripMenuItem = null!;
+    private ToolStripMenuItem deleteToolStripMenuItem = null!;
+    private ToolStripMenuItem findToolStripMenuItem = null!;
+    private ToolStripMenuItem findNextToolStripMenuItem = null!;
+    private ToolStripMenuItem replaceToolStripMenuItem = null!;
+    private ToolStripMenuItem goToToolStripMenuItem = null!;
+    private ToolStripMenuItem selectAllToolStripMenuItem = null!;
+    private ToolStripMenuItem timeDateToolStripMenuItem = null!;
+    private ToolStripMenuItem formatMenu = null!;
+    private ToolStripMenuItem wordWrapToolStripMenuItem = null!;
+    private ToolStripMenuItem fontToolStripMenuItem = null!;
+    private ToolStripMenuItem encodingMenu = null!;
+    private ToolStripMenuItem utf8ToolStripMenuItem = null!;
+    private ToolStripMenuItem utf8BomToolStripMenuItem = null!;
+    private ToolStripMenuItem utf16ToolStripMenuItem = null!;
+    private ToolStripMenuItem ansiToolStripMenuItem = null!;
+    private ToolStripMenuItem lineEndingsMenu = null!;
+    private ToolStripMenuItem windowsLineEndingsToolStripMenuItem = null!;
+    private ToolStripMenuItem unixLineEndingsToolStripMenuItem = null!;
+    private ToolStripMenuItem macLineEndingsToolStripMenuItem = null!;
+    private ToolStripMenuItem viewMenu = null!;
+    private ToolStripMenuItem zoomMenu = null!;
+    private ToolStripMenuItem zoomInToolStripMenuItem = null!;
+    private ToolStripMenuItem zoomOutToolStripMenuItem = null!;
+    private ToolStripMenuItem restoreZoomToolStripMenuItem = null!;
+    private ToolStripMenuItem statusBarToolStripMenuItem = null!;
+    private ToolStripMenuItem helpMenu = null!;
+    private ToolStripMenuItem aboutToolStripMenuItem = null!;
+    private StatusStrip statusStrip = null!;
+    private ToolStripStatusLabel lblStatus = null!;
+    private ToolStripStatusLabel lblEncoding = null!;
+    private ToolStripStatusLabel lblLineEnding = null!;
+    private ToolStripStatusLabel lblZoom = null!;
+    private ToolStripStatusLabel lblPosition = null!;
+    private RichTextBox txtEditor = null!;
+    private ContextMenuStrip editorContextMenu = null!;
+    private ToolStripMenuItem ctxUndo = null!;
+    private ToolStripMenuItem ctxRedo = null!;
+    private ToolStripMenuItem ctxCut = null!;
+    private ToolStripMenuItem ctxCopy = null!;
+    private ToolStripMenuItem ctxPaste = null!;
+    private ToolStripMenuItem ctxDelete = null!;
+    private ToolStripMenuItem ctxSelectAll = null!;
 }

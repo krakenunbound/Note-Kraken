@@ -2,141 +2,72 @@ namespace NoteKraken;
 
 partial class FindReplaceForm
 {
-    private System.ComponentModel.IContainer components = null;
+    private System.ComponentModel.IContainer components = null!;
 
     protected override void Dispose(bool disposing)
     {
-        if (disposing && (components != null))
-        {
-            components.Dispose();
-        }
+        if (disposing)
+            components?.Dispose();
         base.Dispose(disposing);
     }
 
-    #region Windows Form Designer generated code
-
     private void InitializeComponent()
     {
-        this.lblFind = new Label();
-        this.txtFind = new TextBox();
-        this.lblReplace = new Label();
-        this.txtReplace = new TextBox();
-        this.btnFindNext = new Button();
-        this.btnReplace = new Button();
-        this.btnReplaceAll = new Button();
-        this.chkMatchCase = new CheckBox();
-        this.lblStatus = new Label();
-        this.SuspendLayout();
+        lblFind = new Label { AutoSize = true, Location = new Point(12, 15), Text = "Find:" };
+        txtFind = new TextBox { Location = new Point(70, 12), Size = new Size(235, 23) };
+        lblReplace = new Label { AutoSize = true, Location = new Point(12, 46), Text = "Replace:" };
+        txtReplace = new TextBox { Location = new Point(70, 43), Size = new Size(235, 23) };
+        btnFindNext = new Button { Location = new Point(320, 11), Size = new Size(92, 25), Text = "Find Next" };
+        btnReplace = new Button { Location = new Point(320, 42), Size = new Size(92, 25), Text = "Replace" };
+        btnReplaceAll = new Button { Location = new Point(320, 73), Size = new Size(92, 25), Text = "Replace All" };
+        chkMatchCase = new CheckBox { AutoSize = true, Text = "Match case" };
+        chkWholeWord = new CheckBox { AutoSize = true, Text = "Whole word" };
+        lblDirection = new Label { AutoSize = true, Text = "Direction:" };
+        radioDown = new RadioButton { AutoSize = true, Checked = true, Text = "Down" };
+        radioUp = new RadioButton { AutoSize = true, Text = "Up" };
+        chkWrapAround = new CheckBox { AutoSize = true, Checked = true, Text = "Wrap around" };
+        lblStatus = new Label { AutoSize = true };
 
-        // lblFind
-        this.lblFind.AutoSize = true;
-        this.lblFind.Location = new Point(12, 15);
-        this.lblFind.Name = "lblFind";
-        this.lblFind.Size = new Size(33, 15);
-        this.lblFind.TabIndex = 0;
-        this.lblFind.Text = "Find:";
+        txtFind.TextChanged += txtFind_TextChanged;
+        btnFindNext.Click += btnFindNext_Click;
+        btnReplace.Click += btnReplace_Click;
+        btnReplaceAll.Click += btnReplaceAll_Click;
 
-        // txtFind
-        this.txtFind.Location = new Point(70, 12);
-        this.txtFind.Name = "txtFind";
-        this.txtFind.Size = new Size(200, 23);
-        this.txtFind.TabIndex = 1;
-        this.txtFind.TextChanged += new EventHandler(this.txtFind_TextChanged);
-
-        // lblReplace
-        this.lblReplace.AutoSize = true;
-        this.lblReplace.Location = new Point(12, 44);
-        this.lblReplace.Name = "lblReplace";
-        this.lblReplace.Size = new Size(51, 15);
-        this.lblReplace.TabIndex = 2;
-        this.lblReplace.Text = "Replace:";
-
-        // txtReplace
-        this.txtReplace.Location = new Point(70, 41);
-        this.txtReplace.Name = "txtReplace";
-        this.txtReplace.Size = new Size(200, 23);
-        this.txtReplace.TabIndex = 3;
-
-        // btnFindNext
-        this.btnFindNext.Location = new Point(280, 11);
-        this.btnFindNext.Name = "btnFindNext";
-        this.btnFindNext.Size = new Size(85, 25);
-        this.btnFindNext.TabIndex = 4;
-        this.btnFindNext.Text = "Find Next";
-        this.btnFindNext.UseVisualStyleBackColor = false;
-        this.btnFindNext.Click += new EventHandler(this.btnFindNext_Click);
-
-        // btnReplace
-        this.btnReplace.Location = new Point(280, 40);
-        this.btnReplace.Name = "btnReplace";
-        this.btnReplace.Size = new Size(85, 25);
-        this.btnReplace.TabIndex = 5;
-        this.btnReplace.Text = "Replace";
-        this.btnReplace.UseVisualStyleBackColor = false;
-        this.btnReplace.Click += new EventHandler(this.btnReplace_Click);
-
-        // btnReplaceAll
-        this.btnReplaceAll.Location = new Point(280, 69);
-        this.btnReplaceAll.Name = "btnReplaceAll";
-        this.btnReplaceAll.Size = new Size(85, 25);
-        this.btnReplaceAll.TabIndex = 6;
-        this.btnReplaceAll.Text = "Replace All";
-        this.btnReplaceAll.UseVisualStyleBackColor = false;
-        this.btnReplaceAll.Click += new EventHandler(this.btnReplaceAll_Click);
-
-        // chkMatchCase
-        this.chkMatchCase.AutoSize = true;
-        this.chkMatchCase.Location = new Point(70, 70);
-        this.chkMatchCase.Name = "chkMatchCase";
-        this.chkMatchCase.Size = new Size(86, 19);
-        this.chkMatchCase.TabIndex = 7;
-        this.chkMatchCase.Text = "Match case";
-        this.chkMatchCase.UseVisualStyleBackColor = true;
-
-        // lblStatus
-        this.lblStatus.AutoSize = true;
-        this.lblStatus.ForeColor = Color.FromArgb(255, 128, 128);
-        this.lblStatus.Location = new Point(70, 95);
-        this.lblStatus.Name = "lblStatus";
-        this.lblStatus.Size = new Size(0, 15);
-        this.lblStatus.TabIndex = 8;
-
-        // FindReplaceForm
-        this.AcceptButton = this.btnFindNext;
-        this.AutoScaleDimensions = new SizeF(7F, 15F);
-        this.AutoScaleMode = AutoScaleMode.Font;
-        this.ClientSize = new Size(377, 120);
-        this.Controls.Add(this.lblStatus);
-        this.Controls.Add(this.chkMatchCase);
-        this.Controls.Add(this.btnReplaceAll);
-        this.Controls.Add(this.btnReplace);
-        this.Controls.Add(this.btnFindNext);
-        this.Controls.Add(this.txtReplace);
-        this.Controls.Add(this.lblReplace);
-        this.Controls.Add(this.txtFind);
-        this.Controls.Add(this.lblFind);
-        this.FormBorderStyle = FormBorderStyle.FixedDialog;
-        this.KeyPreview = true;
-        this.MaximizeBox = false;
-        this.MinimizeBox = false;
-        this.Name = "FindReplaceForm";
-        this.ShowInTaskbar = false;
-        this.StartPosition = FormStartPosition.CenterParent;
-        this.Text = "Find";
-        this.KeyDown += new KeyEventHandler(this.FindReplaceForm_KeyDown);
-        this.ResumeLayout(false);
-        this.PerformLayout();
+        SuspendLayout();
+        Controls.AddRange(new Control[]
+        {
+            lblFind, txtFind, lblReplace, txtReplace, btnFindNext, btnReplace, btnReplaceAll,
+            chkMatchCase, chkWholeWord, lblDirection, radioDown, radioUp, chkWrapAround, lblStatus
+        });
+        AcceptButton = btnFindNext;
+        AutoScaleDimensions = new SizeF(7F, 15F);
+        AutoScaleMode = AutoScaleMode.Font;
+        ClientSize = new Size(425, 165);
+        FormBorderStyle = FormBorderStyle.FixedDialog;
+        KeyPreview = true;
+        MaximizeBox = false;
+        MinimizeBox = false;
+        Name = "FindReplaceForm";
+        ShowInTaskbar = false;
+        StartPosition = FormStartPosition.CenterParent;
+        Text = "Find";
+        KeyDown += FindReplaceForm_KeyDown;
+        ResumeLayout(false);
+        PerformLayout();
     }
 
-    #endregion
-
-    private Label lblFind;
-    private TextBox txtFind;
-    private Label lblReplace;
-    private TextBox txtReplace;
-    private Button btnFindNext;
-    private Button btnReplace;
-    private Button btnReplaceAll;
-    private CheckBox chkMatchCase;
-    private Label lblStatus;
+    private Label lblFind = null!;
+    private TextBox txtFind = null!;
+    private Label lblReplace = null!;
+    private TextBox txtReplace = null!;
+    private Button btnFindNext = null!;
+    private Button btnReplace = null!;
+    private Button btnReplaceAll = null!;
+    private CheckBox chkMatchCase = null!;
+    private CheckBox chkWholeWord = null!;
+    private Label lblDirection = null!;
+    private RadioButton radioDown = null!;
+    private RadioButton radioUp = null!;
+    private CheckBox chkWrapAround = null!;
+    private Label lblStatus = null!;
 }

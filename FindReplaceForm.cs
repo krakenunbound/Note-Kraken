@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace NoteKraken;
 
@@ -6,181 +7,273 @@ public partial class FindReplaceForm : Form
 {
     [DllImport("dwmapi.dll", PreserveSig = true)]
     private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int value, int size);
-    private const int DWMWA_USE_IMMERSIVE_DARK_MODE = 20;
 
+    private const int DwmwaUseImmersiveDarkMode = 20;
     private readonly RichTextBox _editor;
-    private readonly bool _isDarkMode;
-    private int _lastFoundIndex = -1;
+    private readonly ThemeColors _theme;
+    private bool _showReplace;
+
+    public string SearchText => txtFind.Text;
 
     public bool ShowReplace
     {
-        get => lblReplace.Visible;
+        get => _showReplace;
         set
         {
-            lblReplace.Visible = value;
-            txtReplace.Visible = value;
-            btnReplace.Visible = value;
-            btnReplaceAll.Visible = value;
-            Text = value ? "Replace" : "Find";
-
-            // Adjust form height
-            Height = value ? 180 : 120;
+            _showReplace = value;
+            ApplyModeLayout();
         }
     }
 
-    public FindReplaceForm(RichTextBox editor, bool isDarkMode)
+    internal FindReplaceForm(RichTextBox editor, ThemeColors theme)
     {
         _editor = editor;
-        _isDarkMode = isDarkMode;
+        _theme = theme;
         InitializeComponent();
-        SetupTheme();
+        ApplyTheme();
+        ApplyModeLayout();
     }
 
     protected override void OnHandleCreated(EventArgs e)
     {
         base.OnHandleCreated(e);
-        int value = _isDarkMode ? 1 : 0;
-        DwmSetWindowAttribute(Handle, DWMWA_USE_IMMERSIVE_DARK_MODE, ref value, sizeof(int));
+        int value = _theme.IsDark ? 1 : 0;
+        _ = DwmSetWindowAttribute(Handle, DwmwaUseImmersiveDarkMode, ref value, sizeof(int));
     }
 
-    private void SetupTheme()
+    public void FocusSearch()
     {
-        if (_isDarkMode)
-        {
-            var backgroundColor = Color.FromArgb(45, 45, 45);
-            var textColor = Color.FromArgb(212, 212, 212);
-            var textBoxBack = Color.FromArgb(30, 30, 30);
-            var buttonBack = Color.FromArgb(60, 60, 60);
-
-            BackColor = backgroundColor;
-            ForeColor = textColor;
-
-            txtFind.BackColor = textBoxBack;
-            txtFind.ForeColor = textColor;
-            txtReplace.BackColor = textBoxBack;
-            txtReplace.ForeColor = textColor;
-
-            foreach (Control c in Controls)
-            {
-                if (c is Button btn)
-                {
-                    btn.BackColor = buttonBack;
-                    btn.ForeColor = textColor;
-                    btn.FlatStyle = FlatStyle.Flat;
-                    btn.FlatAppearance.BorderColor = Color.FromArgb(80, 80, 80);
-                }
-                else if (c is CheckBox chk)
-                {
-                    chk.ForeColor = textColor;
-                }
-            }
-
-            lblStatus.ForeColor = Color.FromArgb(255, 128, 128);
-        }
-        // Light mode uses system defaults
+        txtFind.Focus();
+        txtFind.SelectAll();
     }
 
-    private void FindNext()
+    private void ApplyModeLayout()
+    {
+        if (lblReplace == null)
+            return;
+
+        lblReplace.Visible = _showReplace;
+        txtReplace.Visible = _showReplace;
+        btnReplace.Visible = _showReplace;
+        btnReplaceAll.Visible = _showReplace;
+        Text = _showReplace ? "Replace" : "Find";
+
+        int offset = _showReplace ? 0 : -30;
+        chkMatchCase.Location = new Point(70, 76 + offset);
+        chkWholeWord.Location = new Point(180, 76 + offset);
+        lblDirection.Location = new Point(12, 106 + offset);
+        radioDown.Location = new Point(70, 104 + offset);
+        radioUp.Location = new Point(135, 104 + offset);
+        chkWrapAround.Location = new Point(220, 104 + offset);
+        lblStatus.Location = new Point(70, 134 + offset);
+        ClientSize = new Size(425, 165 + offset);
+    }
+
+    private void ApplyTheme()
+    {
+        BackColor = _theme.MenuBackground;
+        ForeColor = _theme.Text;
+        foreach (Control control in Controls)
+        {
+            control.ForeColor = _theme.Text;
+            if (control is TextBox box)
+            {
+                box.BackColor = _theme.Background;
+                box.BorderStyle = BorderStyle.FixedSingle;
+            }
+            else if (control is Button button)
+            {
+                button.BackColor = _theme.Highlight;
+                button.FlatStyle = FlatStyle.Flat;
+                button.FlatAppearance.BorderColor = _theme.Accent;
+            }
+        }
+        lblStatus.ForeColor = _theme.Accent;
+    }
+
+    public void FindNext()
     {
         string searchText = txtFind.Text;
         if (string.IsNullOrEmpty(searchText))
         {
             lblStatus.Text = "Enter search text";
+            FocusSearch();
             return;
         }
 
+        bool forward = radioDown.Checked;
+        int start = forward
+            ? _editor.SelectionStart + _editor.SelectionLength
+            : _editor.SelectionStart - 1;
+        int found = FindIndex(_editor.Text, searchText, start, forward, allowWrap: chkWrapAround.Checked);
+
+        if (found < 0)
+        {
+            lblStatus.Text = $"Cannot find “{searchText}”";
+            return;
+        }
+
+        _editor.SelectionStart = found;
+        _editor.SelectionLength = searchText.Length;
+        _editor.ScrollToCaret();
+        _editor.Focus();
+        lblStatus.Text = string.Empty;
+    }
+
+    private int FindIndex(string text, string search, int start, bool forward, bool allowWrap)
+    {
         StringComparison comparison = chkMatchCase.Checked
             ? StringComparison.Ordinal
             : StringComparison.OrdinalIgnoreCase;
 
-        int startIndex = _lastFoundIndex >= 0 ? _lastFoundIndex + 1 : _editor.SelectionStart;
-        if (startIndex >= _editor.Text.Length) startIndex = 0;
-
-        int foundIndex = _editor.Text.IndexOf(searchText, startIndex, comparison);
-
-        if (foundIndex < 0 && startIndex > 0)
+        if (forward)
         {
-            // Wrap around
-            foundIndex = _editor.Text.IndexOf(searchText, 0, comparison);
+            int index = FindForward(text, search, Math.Clamp(start, 0, text.Length), comparison, text.Length);
+            if (index < 0 && allowWrap && start > 0)
+                index = FindForward(text, search, 0, comparison, Math.Min(start, text.Length));
+            return index;
         }
 
-        if (foundIndex >= 0)
+        int backwardStart = Math.Min(start, text.Length - 1);
+        int result = FindBackward(text, search, backwardStart, comparison, 0);
+        if (result < 0 && allowWrap && start < text.Length - 1)
+            result = FindBackward(text, search, text.Length - 1, comparison, Math.Max(0, start + 1));
+        return result;
+    }
+
+    private int FindForward(string text, string search, int start, StringComparison comparison, int limit)
+    {
+        int index = start;
+        while (index <= text.Length - search.Length)
         {
-            _editor.SelectionStart = foundIndex;
-            _editor.SelectionLength = searchText.Length;
-            _editor.ScrollToCaret();
-            _editor.Focus();
-            _lastFoundIndex = foundIndex;
-            lblStatus.Text = "";
+            index = text.IndexOf(search, index, comparison);
+            if (index < 0 || index >= limit)
+                return -1;
+            if (!chkWholeWord.Checked || IsWholeWord(text, index, search.Length))
+                return index;
+            index++;
         }
-        else
+        return -1;
+    }
+
+    private int FindBackward(string text, string search, int start, StringComparison comparison, int lowerLimit)
+    {
+        if (text.Length == 0 || start < 0)
+            return -1;
+
+        int index = Math.Min(start, text.Length - 1);
+        while (index >= lowerLimit)
         {
-            lblStatus.Text = "Not found";
-            _lastFoundIndex = -1;
+            index = text.LastIndexOf(search, index, comparison);
+            if (index < lowerLimit)
+                return -1;
+            if (!chkWholeWord.Checked || IsWholeWord(text, index, search.Length))
+                return index;
+            index--;
         }
+        return -1;
+    }
+
+    private static bool IsWholeWord(string text, int index, int length)
+    {
+        bool leftBoundary = index == 0 || !IsWordCharacter(text[index - 1]);
+        int after = index + length;
+        bool rightBoundary = after >= text.Length || !IsWordCharacter(text[after]);
+        return leftBoundary && rightBoundary;
+    }
+
+    private static bool IsWordCharacter(char c) => char.IsLetterOrDigit(c) || c == '_';
+
+    private bool SelectionMatchesSearch()
+    {
+        if (_editor.SelectionLength != txtFind.Text.Length)
+            return false;
+
+        StringComparison comparison = chkMatchCase.Checked
+            ? StringComparison.Ordinal
+            : StringComparison.OrdinalIgnoreCase;
+        return string.Equals(_editor.SelectedText, txtFind.Text, comparison)
+            && (!chkWholeWord.Checked || IsWholeWord(_editor.Text, _editor.SelectionStart, _editor.SelectionLength));
     }
 
     private void Replace()
     {
-        if (_editor.SelectionLength > 0)
+        if (string.IsNullOrEmpty(txtFind.Text))
         {
-            _editor.SelectedText = txtReplace.Text;
+            lblStatus.Text = "Enter search text";
+            return;
         }
+
+        if (!SelectionMatchesSearch())
+            FindNext();
+
+        if (SelectionMatchesSearch())
+            _editor.SelectedText = txtReplace.Text;
+
         FindNext();
     }
 
     private void ReplaceAll()
     {
-        string searchText = txtFind.Text;
-        string replaceText = txtReplace.Text;
-
-        if (string.IsNullOrEmpty(searchText))
+        string search = txtFind.Text;
+        if (string.IsNullOrEmpty(search))
         {
             lblStatus.Text = "Enter search text";
             return;
         }
 
+        string source = _editor.Text;
+        string replacement = txtReplace.Text;
         StringComparison comparison = chkMatchCase.Checked
             ? StringComparison.Ordinal
             : StringComparison.OrdinalIgnoreCase;
-
+        var output = new StringBuilder(source.Length);
+        int position = 0;
         int count = 0;
-        int index = 0;
-        string text = _editor.Text;
 
-        while ((index = text.IndexOf(searchText, index, comparison)) >= 0)
+        while (position <= source.Length - search.Length)
         {
-            text = text.Remove(index, searchText.Length).Insert(index, replaceText);
-            index += replaceText.Length;
+            int found = source.IndexOf(search, position, comparison);
+            if (found < 0)
+                break;
+            if (chkWholeWord.Checked && !IsWholeWord(source, found, search.Length))
+            {
+                output.Append(source, position, found - position + 1);
+                position = found + 1;
+                continue;
+            }
+
+            output.Append(source, position, found - position);
+            output.Append(replacement);
+            position = found + search.Length;
             count++;
         }
+        output.Append(source, position, source.Length - position);
 
-        if (count > 0)
-        {
-            _editor.Text = text;
-            lblStatus.Text = $"Replaced {count} occurrence(s)";
-        }
-        else
+        if (count == 0)
         {
             lblStatus.Text = "Not found";
+            return;
         }
+
+        int caret = _editor.SelectionStart;
+        _editor.Text = output.ToString();
+        _editor.SelectionStart = Math.Min(caret, _editor.TextLength);
+        _editor.SelectionLength = 0;
+        lblStatus.Text = $"Replaced {count} occurrence{(count == 1 ? string.Empty : "s")}";
     }
 
-    private void btnFindNext_Click(object sender, EventArgs e) => FindNext();
-    private void btnReplace_Click(object sender, EventArgs e) => Replace();
-    private void btnReplaceAll_Click(object sender, EventArgs e) => ReplaceAll();
+    private void btnFindNext_Click(object? sender, EventArgs e) => FindNext();
+    private void btnReplace_Click(object? sender, EventArgs e) => Replace();
+    private void btnReplaceAll_Click(object? sender, EventArgs e) => ReplaceAll();
+    private void txtFind_TextChanged(object? sender, EventArgs e) => lblStatus.Text = string.Empty;
 
-    private void txtFind_TextChanged(object sender, EventArgs e)
-    {
-        _lastFoundIndex = -1;
-        lblStatus.Text = "";
-    }
-
-    private void FindReplaceForm_KeyDown(object sender, KeyEventArgs e)
+    private void FindReplaceForm_KeyDown(object? sender, KeyEventArgs e)
     {
         if (e.KeyCode == Keys.Escape)
         {
-            Close();
+            Hide();
+            e.SuppressKeyPress = true;
         }
         else if (e.KeyCode == Keys.Enter)
         {

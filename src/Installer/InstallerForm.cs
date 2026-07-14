@@ -1,16 +1,25 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Text;
 using Microsoft.Win32;
 
 namespace NoteKrakenInstaller;
 
-public class InstallerForm : Form
+public sealed class InstallerForm : Form
 {
     [DllImport("dwmapi.dll", PreserveSig = true)]
     private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int value, int size);
-    private const int DWMWA_USE_IMMERSIVE_DARK_MODE = 20;
+
+    [DllImport("shell32.dll")]
+    private static extern void SHChangeNotify(uint eventId, uint flags, IntPtr item1, IntPtr item2);
+
+    private const int DwmwaUseImmersiveDarkMode = 20;
+    private const uint ShcneAssocChanged = 0x08000000;
+    private const uint ShcnfIdList = 0x0000;
+    private const string AppVersion = "1.1.0";
 
     private readonly string _defaultPath;
+    private readonly bool _isDarkMode;
     private TextBox _pathBox = null!;
     private CheckBox _desktopShortcut = null!;
     private CheckBox _startMenuShortcut = null!;
@@ -18,32 +27,28 @@ public class InstallerForm : Form
     private CheckBox _associateLog = null!;
     private CheckBox _associateIni = null!;
     private CheckBox _associateMd = null!;
-    private Button _installBtn = null!;
-    private Button _browseBtn = null!;
+    private Button _installButton = null!;
+    private Button _browseButton = null!;
     private ProgressBar _progress = null!;
     private Label _statusLabel = null!;
-    private bool _isDarkMode;
 
-    private static readonly string[] EmbeddedFiles = {
-        "NoteKraken.exe",
-        "NoteKraken.dll",
-        "NoteKraken.deps.json",
-        "NoteKraken.runtimeconfig.json",
-        "kraken_transparent.ico"
-    };
+    private static readonly string[] EmbeddedFiles = { "NoteKraken.exe", "note-kraken.ico" };
 
     public InstallerForm()
     {
-        _defaultPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "NoteKraken");
+        _defaultPath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "NoteKraken");
         _isDarkMode = IsWindowsDarkMode();
         InitializeComponent();
+        LoadInstallerIcon();
     }
 
     protected override void OnHandleCreated(EventArgs e)
     {
         base.OnHandleCreated(e);
         int value = _isDarkMode ? 1 : 0;
-        DwmSetWindowAttribute(Handle, DWMWA_USE_IMMERSIVE_DARK_MODE, ref value, sizeof(int));
+        _ = DwmSetWindowAttribute(Handle, DwmwaUseImmersiveDarkMode, ref value, sizeof(int));
     }
 
     private static bool IsWindowsDarkMode()
@@ -51,423 +56,389 @@ public class InstallerForm : Form
         try
         {
             using var key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize");
-            var value = key?.GetValue("AppsUseLightTheme");
-            return value is int i && i == 0;
+            return key?.GetValue("AppsUseLightTheme") is int value && value == 0;
         }
-        catch { return false; }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private void LoadInstallerIcon()
+    {
+        try
+        {
+            using Stream? stream = typeof(InstallerForm).Assembly.GetManifestResourceStream("note-kraken.ico");
+            if (stream != null)
+                Icon = new Icon(stream);
+        }
+        catch
+        {
+            // The executable still has the compiled application icon.
+        }
     }
 
     private void InitializeComponent()
     {
-        Text = "Note Kraken Setup";
-        Size = new Size(500, 420);
+        Text = $"Note Kraken {AppVersion} Setup";
+        ClientSize = new Size(520, 430);
         FormBorderStyle = FormBorderStyle.FixedDialog;
         MaximizeBox = false;
         StartPosition = FormStartPosition.CenterScreen;
 
-        var bgColor = _isDarkMode ? Color.FromArgb(30, 30, 30) : SystemColors.Control;
-        var fgColor = _isDarkMode ? Color.FromArgb(212, 212, 212) : SystemColors.ControlText;
-        var boxBg = _isDarkMode ? Color.FromArgb(45, 45, 45) : SystemColors.Window;
+        Color background = _isDarkMode ? Color.FromArgb(31, 27, 23) : Color.FromArgb(255, 253, 247);
+        Color foreground = _isDarkMode ? Color.FromArgb(244, 235, 221) : Color.FromArgb(43, 36, 29);
+        Color panel = _isDarkMode ? Color.FromArgb(43, 37, 31) : Color.FromArgb(246, 237, 221);
+        Color accent = _isDarkMode ? Color.FromArgb(229, 163, 59) : Color.FromArgb(185, 101, 24);
 
-        BackColor = bgColor;
-        ForeColor = fgColor;
+        BackColor = background;
+        ForeColor = foreground;
 
-        // Title
         var title = new Label
         {
             Text = "Note Kraken",
-            Font = new Font("Segoe UI", 18, FontStyle.Bold),
-            Location = new Point(20, 15),
-            AutoSize = true,
-            ForeColor = fgColor
+            Font = new Font("Segoe UI", 20, FontStyle.Bold),
+            ForeColor = accent,
+            Location = new Point(22, 16),
+            AutoSize = true
         };
-        Controls.Add(title);
-
         var subtitle = new Label
         {
-            Text = "A fast, simple text editor. No bloat, no AI, just text.",
-            Location = new Point(22, 50),
-            AutoSize = true,
-            ForeColor = fgColor
+            Text = "A fast, focused text editor. No bloat. No AI. Just text.",
+            ForeColor = foreground,
+            Location = new Point(25, 56),
+            AutoSize = true
         };
-        Controls.Add(subtitle);
-
-        // Install location
         var pathLabel = new Label
         {
             Text = "Install location:",
-            Location = new Point(20, 90),
-            AutoSize = true,
-            ForeColor = fgColor
+            ForeColor = foreground,
+            Location = new Point(22, 94),
+            AutoSize = true
         };
-        Controls.Add(pathLabel);
 
         _pathBox = new TextBox
         {
             Text = _defaultPath,
-            Location = new Point(20, 110),
-            Size = new Size(350, 23),
-            BackColor = boxBg,
-            ForeColor = fgColor
+            Location = new Point(22, 116),
+            Size = new Size(374, 23),
+            BackColor = panel,
+            ForeColor = foreground,
+            BorderStyle = BorderStyle.FixedSingle
         };
-        Controls.Add(_pathBox);
+        _browseButton = MakeButton("Browse...", new Point(407, 114), new Size(88, 28), panel, foreground, accent);
+        _browseButton.Click += BrowseButton_Click;
 
-        _browseBtn = new Button
-        {
-            Text = "Browse...",
-            Location = new Point(380, 109),
-            Size = new Size(80, 25),
-            FlatStyle = _isDarkMode ? FlatStyle.Flat : FlatStyle.Standard,
-            BackColor = _isDarkMode ? Color.FromArgb(60, 60, 60) : SystemColors.Control,
-            ForeColor = fgColor
-        };
-        _browseBtn.Click += BrowseBtn_Click;
-        Controls.Add(_browseBtn);
-
-        // Options
         var optionsLabel = new Label
         {
-            Text = "Options:",
-            Location = new Point(20, 150),
-            AutoSize = true,
-            ForeColor = fgColor
+            Text = "Shortcuts",
+            Font = new Font("Segoe UI", 9, FontStyle.Bold),
+            ForeColor = accent,
+            Location = new Point(22, 160),
+            AutoSize = true
         };
-        Controls.Add(optionsLabel);
+        _desktopShortcut = MakeCheckBox("Desktop shortcut", true, new Point(32, 184), foreground);
+        _startMenuShortcut = MakeCheckBox("Start Menu shortcut", true, new Point(210, 184), foreground);
 
-        _desktopShortcut = new CheckBox
+        var associationsLabel = new Label
         {
-            Text = "Create desktop shortcut",
-            Checked = true,
-            Location = new Point(30, 170),
-            AutoSize = true,
-            ForeColor = fgColor
+            Text = "Available in Open With / Default Apps",
+            Font = new Font("Segoe UI", 9, FontStyle.Bold),
+            ForeColor = accent,
+            Location = new Point(22, 222),
+            AutoSize = true
         };
-        Controls.Add(_desktopShortcut);
+        _associateTxt = MakeCheckBox(".txt  Text", true, new Point(32, 248), foreground);
+        _associateLog = MakeCheckBox(".log  Logs", false, new Point(210, 248), foreground);
+        _associateIni = MakeCheckBox(".ini / .cfg  Configuration", false, new Point(32, 276), foreground);
+        _associateMd = MakeCheckBox(".md  Markdown", false, new Point(270, 276), foreground);
 
-        _startMenuShortcut = new CheckBox
+        var associationNote = new Label
         {
-            Text = "Create Start Menu shortcut",
-            Checked = true,
-            Location = new Point(30, 195),
-            AutoSize = true,
-            ForeColor = fgColor
+            Text = "Windows may ask you to confirm the default app the first time each type is opened.",
+            ForeColor = foreground,
+            Location = new Point(32, 306),
+            AutoSize = true
         };
-        Controls.Add(_startMenuShortcut);
 
-        // File associations
-        var assocLabel = new Label
-        {
-            Text = "File associations:",
-            Location = new Point(20, 230),
-            AutoSize = true,
-            ForeColor = fgColor
-        };
-        Controls.Add(assocLabel);
-
-        _associateTxt = new CheckBox
-        {
-            Text = ".txt (Text files)",
-            Checked = true,
-            Location = new Point(30, 250),
-            AutoSize = true,
-            ForeColor = fgColor
-        };
-        Controls.Add(_associateTxt);
-
-        _associateLog = new CheckBox
-        {
-            Text = ".log (Log files)",
-            Checked = false,
-            Location = new Point(180, 250),
-            AutoSize = true,
-            ForeColor = fgColor
-        };
-        Controls.Add(_associateLog);
-
-        _associateIni = new CheckBox
-        {
-            Text = ".ini (Config files)",
-            Checked = false,
-            Location = new Point(30, 275),
-            AutoSize = true,
-            ForeColor = fgColor
-        };
-        Controls.Add(_associateIni);
-
-        _associateMd = new CheckBox
-        {
-            Text = ".md (Markdown)",
-            Checked = false,
-            Location = new Point(180, 275),
-            AutoSize = true,
-            ForeColor = fgColor
-        };
-        Controls.Add(_associateMd);
-
-        // Progress
         _progress = new ProgressBar
         {
-            Location = new Point(20, 315),
-            Size = new Size(445, 23),
+            Location = new Point(22, 340),
+            Size = new Size(473, 20),
             Visible = false
         };
-        Controls.Add(_progress);
-
         _statusLabel = new Label
         {
-            Text = "",
-            Location = new Point(20, 315),
-            Size = new Size(445, 23),
-            ForeColor = fgColor
+            Location = new Point(22, 342),
+            Size = new Size(473, 20),
+            ForeColor = foreground
         };
-        Controls.Add(_statusLabel);
 
-        // Install button
-        _installBtn = new Button
-        {
-            Text = "Install",
-            Location = new Point(380, 345),
-            Size = new Size(85, 30),
-            FlatStyle = _isDarkMode ? FlatStyle.Flat : FlatStyle.Standard,
-            BackColor = _isDarkMode ? Color.FromArgb(60, 60, 60) : SystemColors.Control,
-            ForeColor = fgColor
-        };
-        _installBtn.Click += InstallBtn_Click;
-        Controls.Add(_installBtn);
+        _installButton = MakeButton("Install", new Point(407, 378), new Size(88, 32), accent, Color.FromArgb(31, 27, 23), accent);
+        _installButton.Click += InstallButton_Click;
+        var cancelButton = MakeButton("Cancel", new Point(309, 378), new Size(88, 32), panel, foreground, accent);
+        cancelButton.Click += (_, _) => Close();
 
-        var cancelBtn = new Button
+        AcceptButton = _installButton;
+        CancelButton = cancelButton;
+        Controls.AddRange(new Control[]
         {
-            Text = "Cancel",
-            Location = new Point(285, 345),
-            Size = new Size(85, 30),
-            FlatStyle = _isDarkMode ? FlatStyle.Flat : FlatStyle.Standard,
-            BackColor = _isDarkMode ? Color.FromArgb(60, 60, 60) : SystemColors.Control,
-            ForeColor = fgColor
-        };
-        cancelBtn.Click += (s, e) => Close();
-        Controls.Add(cancelBtn);
+            title, subtitle, pathLabel, _pathBox, _browseButton, optionsLabel,
+            _desktopShortcut, _startMenuShortcut, associationsLabel, _associateTxt,
+            _associateLog, _associateIni, _associateMd, associationNote,
+            _progress, _statusLabel, _installButton, cancelButton
+        });
     }
 
-    private void BrowseBtn_Click(object? sender, EventArgs e)
+    private static Button MakeButton(string text, Point location, Size size, Color back, Color fore, Color border)
+    {
+        var button = new Button
+        {
+            Text = text,
+            Location = location,
+            Size = size,
+            BackColor = back,
+            ForeColor = fore,
+            FlatStyle = FlatStyle.Flat
+        };
+        button.FlatAppearance.BorderColor = border;
+        return button;
+    }
+
+    private static CheckBox MakeCheckBox(string text, bool value, Point location, Color foreground) => new()
+    {
+        Text = text,
+        Checked = value,
+        Location = location,
+        AutoSize = true,
+        ForeColor = foreground
+    };
+
+    private void BrowseButton_Click(object? sender, EventArgs e)
     {
         using var dialog = new FolderBrowserDialog
         {
-            Description = "Select installation folder",
-            InitialDirectory = _pathBox.Text
+            Description = "Choose where Note Kraken will be installed",
+            InitialDirectory = Directory.Exists(_pathBox.Text) ? _pathBox.Text : _defaultPath,
+            UseDescriptionForTitle = true
         };
-        if (dialog.ShowDialog() == DialogResult.OK)
-        {
+        if (dialog.ShowDialog(this) == DialogResult.OK)
             _pathBox.Text = dialog.SelectedPath;
-        }
     }
 
-    private async void InstallBtn_Click(object? sender, EventArgs e)
+    private async void InstallButton_Click(object? sender, EventArgs e)
     {
-        _installBtn.Enabled = false;
-        _browseBtn.Enabled = false;
-        _progress.Visible = true;
-        _statusLabel.Visible = false;
-        _progress.Value = 0;
-
+        string installPath;
         try
         {
-            string installPath = _pathBox.Text;
+            if (string.IsNullOrWhiteSpace(_pathBox.Text))
+                throw new InvalidOperationException("Choose an installation folder.");
+            installPath = Path.GetFullPath(Environment.ExpandEnvironmentVariables(_pathBox.Text.Trim()));
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(ex.Message, "Invalid install location", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
+
+        SetBusy(true);
+        try
+        {
             Directory.CreateDirectory(installPath);
-
-            // Extract files
-            _progress.Value = 10;
             await Task.Run(() => ExtractFiles(installPath));
-            _progress.Value = 50;
+            _progress.Value = 35;
 
-            // Register application
             await Task.Run(() => RegisterApplication(installPath));
-            _progress.Value = 70;
+            _progress.Value = 55;
 
-            string exePath = Path.Combine(installPath, "NoteKraken.exe");
-            string iconPath = Path.Combine(installPath, "kraken_transparent.ico");
+            string executable = Path.Combine(installPath, "NoteKraken.exe");
+            string icon = Path.Combine(installPath, "note-kraken.ico");
+            if (!File.Exists(executable))
+                throw new FileNotFoundException("The editor executable was not installed.", executable);
 
-            // Create shortcuts
             if (_desktopShortcut.Checked)
             {
-                string desktopPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "Note Kraken.lnk");
-                CreateShortcut(desktopPath, exePath, iconPath);
+                string desktop = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory), "Note Kraken.lnk");
+                CreateShortcut(desktop, executable, icon);
             }
-            _progress.Value = 80;
+            _progress.Value = 70;
 
             if (_startMenuShortcut.Checked)
             {
-                string startMenuPath = Path.Combine(
+                string folder = Path.Combine(
                     Environment.GetFolderPath(Environment.SpecialFolder.StartMenu),
-                    "Programs", "Note Kraken"
-                );
-                Directory.CreateDirectory(startMenuPath);
-                CreateShortcut(Path.Combine(startMenuPath, "Note Kraken.lnk"), exePath, iconPath);
+                    "Programs",
+                    "Note Kraken");
+                Directory.CreateDirectory(folder);
+                CreateShortcut(Path.Combine(folder, "Note Kraken.lnk"), executable, icon);
             }
-            _progress.Value = 90;
+            _progress.Value = 82;
 
-            // File associations
-            RegisterFileAssociations(installPath);
+            RegisterSelectedAssociations();
+            CreateUninstallEntry(installPath);
+            SHChangeNotify(ShcneAssocChanged, ShcnfIdList, IntPtr.Zero, IntPtr.Zero);
             _progress.Value = 100;
 
-            // Create uninstaller info
-            CreateUninstallEntry(installPath);
-
-            MessageBox.Show(
-                "Note Kraken has been installed successfully!\n\n" +
+            DialogResult launch = MessageBox.Show(
+                $"Note Kraken {AppVersion} was installed successfully.\n\n" +
                 $"Location: {installPath}\n\n" +
-                "You can set it as your default text editor in:\n" +
-                "Settings → Apps → Default apps",
-                "Installation Complete",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Information
-            );
+                "Selected file types are now available under Open With and Windows Default Apps.\n\n" +
+                "Launch Note Kraken now?",
+                "Installation complete",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Information);
 
-            // Offer to launch
-            if (MessageBox.Show("Would you like to launch Note Kraken now?", "Launch", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
-            {
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = exePath,
-                    UseShellExecute = true
-                });
-            }
-
+            if (launch == DialogResult.Yes)
+                Process.Start(new ProcessStartInfo(executable) { UseShellExecute = true });
             Close();
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Installation failed: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            _installBtn.Enabled = true;
-            _browseBtn.Enabled = true;
-            _progress.Visible = false;
+            MessageBox.Show($"Installation failed: {ex.Message}", "Note Kraken Setup", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            SetBusy(false);
         }
     }
 
-    private void ExtractFiles(string installPath)
+    private void SetBusy(bool busy)
+    {
+        _installButton.Enabled = !busy;
+        _browseButton.Enabled = !busy;
+        _progress.Visible = busy;
+        _statusLabel.Visible = !busy;
+        if (busy)
+            _progress.Value = 5;
+    }
+
+    private static void ExtractFiles(string installPath)
     {
         var assembly = typeof(InstallerForm).Assembly;
-        foreach (var fileName in EmbeddedFiles)
+        foreach (string fileName in EmbeddedFiles)
         {
-            using var stream = assembly.GetManifestResourceStream(fileName);
-            if (stream == null) continue;
-
-            string destPath = Path.Combine(installPath, fileName);
-            using var fileStream = File.Create(destPath);
-            stream.CopyTo(fileStream);
+            using Stream stream = assembly.GetManifestResourceStream(fileName)
+                ?? throw new InvalidOperationException($"Installer resource is missing: {fileName}");
+            string destination = Path.Combine(installPath, fileName);
+            using var file = new FileStream(destination, FileMode.Create, FileAccess.Write, FileShare.None);
+            stream.CopyTo(file);
         }
     }
 
-    private void RegisterApplication(string installPath)
+    private static void RegisterApplication(string installPath)
     {
-        string exePath = Path.Combine(installPath, "NoteKraken.exe");
-        string iconPath = Path.Combine(installPath, "kraken_transparent.ico");
+        string executable = Path.Combine(installPath, "NoteKraken.exe");
+        string icon = Path.Combine(installPath, "note-kraken.ico");
 
-        // Register capabilities
         using (var key = Registry.CurrentUser.CreateSubKey(@"Software\NoteKraken\Capabilities"))
         {
             key.SetValue("ApplicationName", "Note Kraken");
-            key.SetValue("ApplicationDescription", "A fast, simple text editor. No bloat, no AI, just text.");
+            key.SetValue("ApplicationDescription", "A fast, focused text editor for Windows.");
+            key.SetValue("ApplicationIcon", icon);
         }
-
         using (var key = Registry.CurrentUser.CreateSubKey(@"Software\NoteKraken\Capabilities\FileAssociations"))
         {
-            key.SetValue(".txt", "NoteKraken.TextFile");
-            key.SetValue(".log", "NoteKraken.TextFile");
-            key.SetValue(".ini", "NoteKraken.TextFile");
-            key.SetValue(".cfg", "NoteKraken.TextFile");
-            key.SetValue(".md", "NoteKraken.TextFile");
+            foreach (string extension in SupportedExtensions())
+                key.SetValue(extension, "NoteKraken.TextFile");
         }
-
-        // Register with Windows
         using (var key = Registry.CurrentUser.CreateSubKey(@"Software\RegisteredApplications"))
-        {
             key.SetValue("NoteKraken", @"Software\NoteKraken\Capabilities");
-        }
 
-        // Register file type
         using (var key = Registry.CurrentUser.CreateSubKey(@"Software\Classes\NoteKraken.TextFile"))
         {
-            key.SetValue("", "Text File");
-            key.SetValue("FriendlyTypeName", "Text File");
+            key.SetValue(string.Empty, "Text Document");
+            key.SetValue("FriendlyTypeName", "Text Document");
         }
         using (var key = Registry.CurrentUser.CreateSubKey(@"Software\Classes\NoteKraken.TextFile\DefaultIcon"))
-        {
-            key.SetValue("", iconPath);
-        }
+            key.SetValue(string.Empty, $"\"{icon}\"");
         using (var key = Registry.CurrentUser.CreateSubKey(@"Software\Classes\NoteKraken.TextFile\shell\open\command"))
-        {
-            key.SetValue("", $"\"{exePath}\" \"%1\"");
-        }
+            key.SetValue(string.Empty, $"\"{executable}\" \"%1\"");
 
-        // Register in Applications
         using (var key = Registry.CurrentUser.CreateSubKey(@"Software\Classes\Applications\NoteKraken.exe"))
-        {
             key.SetValue("FriendlyAppName", "Note Kraken");
-        }
+        using (var key = Registry.CurrentUser.CreateSubKey(@"Software\Classes\Applications\NoteKraken.exe\DefaultIcon"))
+            key.SetValue(string.Empty, $"\"{icon}\"");
         using (var key = Registry.CurrentUser.CreateSubKey(@"Software\Classes\Applications\NoteKraken.exe\shell\open\command"))
-        {
-            key.SetValue("", $"\"{exePath}\" \"%1\"");
-        }
+            key.SetValue(string.Empty, $"\"{executable}\" \"%1\"");
         using (var key = Registry.CurrentUser.CreateSubKey(@"Software\Classes\Applications\NoteKraken.exe\SupportedTypes"))
         {
-            key.SetValue(".txt", "");
-            key.SetValue(".log", "");
-            key.SetValue(".ini", "");
-            key.SetValue(".cfg", "");
-            key.SetValue(".md", "");
+            foreach (string extension in SupportedExtensions())
+                key.SetValue(extension, string.Empty);
         }
     }
 
-    private void RegisterFileAssociations(string installPath)
+    private void RegisterSelectedAssociations()
     {
-        var associations = new List<string>();
-        if (_associateTxt.Checked) associations.Add(".txt");
-        if (_associateLog.Checked) associations.Add(".log");
-        if (_associateIni.Checked) associations.Add(".ini");
-        if (_associateMd.Checked) associations.Add(".md");
+        var selected = new List<string>();
+        if (_associateTxt.Checked) selected.Add(".txt");
+        if (_associateLog.Checked) selected.Add(".log");
+        if (_associateIni.Checked) selected.AddRange(new[] { ".ini", ".cfg" });
+        if (_associateMd.Checked) selected.Add(".md");
 
-        foreach (var ext in associations)
+        foreach (string extension in selected)
         {
-            using var key = Registry.CurrentUser.CreateSubKey($@"Software\Classes\{ext}\OpenWithProgids");
-            key.SetValue("NoteKraken.TextFile", "");
+            using var key = Registry.CurrentUser.CreateSubKey($@"Software\Classes\{extension}\OpenWithProgids");
+            key.SetValue("NoteKraken.TextFile", Array.Empty<byte>(), RegistryValueKind.None);
         }
     }
 
-    private void CreateUninstallEntry(string installPath)
+    private static string[] SupportedExtensions() => new[] { ".txt", ".log", ".ini", ".cfg", ".md" };
+
+    private static void CreateUninstallEntry(string installPath)
     {
-        string exePath = Path.Combine(installPath, "NoteKraken.exe");
-        string iconPath = Path.Combine(installPath, "kraken_transparent.ico");
+        string icon = Path.Combine(installPath, "note-kraken.ico");
+        string desktop = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory), "Note Kraken.lnk");
+        string startMenu = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.StartMenu), "Programs", "Note Kraken");
+        string extensions = string.Join(",", SupportedExtensions().Select(extension => $"'{extension}'"));
+        string script = $@"
+$ErrorActionPreference = 'SilentlyContinue'
+Get-Process -Name 'NoteKraken' | Stop-Process -Force
+Remove-Item -LiteralPath '{EscapePowerShellLiteral(desktop)}' -Force
+Remove-Item -LiteralPath '{EscapePowerShellLiteral(startMenu)}' -Recurse -Force
+foreach ($ext in @({extensions})) {{ Remove-ItemProperty -LiteralPath ('HKCU:\Software\Classes\' + $ext + '\OpenWithProgids') -Name 'NoteKraken.TextFile' }}
+Remove-Item -LiteralPath 'HKCU:\Software\NoteKraken' -Recurse -Force
+Remove-Item -LiteralPath 'HKCU:\Software\Classes\NoteKraken.TextFile' -Recurse -Force
+Remove-Item -LiteralPath 'HKCU:\Software\Classes\Applications\NoteKraken.exe' -Recurse -Force
+Remove-ItemProperty -LiteralPath 'HKCU:\Software\RegisteredApplications' -Name 'NoteKraken'
+Remove-Item -LiteralPath '{EscapePowerShellLiteral(installPath)}' -Recurse -Force
+Remove-Item -LiteralPath 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\NoteKraken' -Recurse -Force
+";
+        string encoded = Convert.ToBase64String(Encoding.Unicode.GetBytes(script));
+        string uninstall = $"powershell.exe -NoProfile -ExecutionPolicy Bypass -EncodedCommand {encoded}";
 
         using var key = Registry.CurrentUser.CreateSubKey(@"Software\Microsoft\Windows\CurrentVersion\Uninstall\NoteKraken");
         key.SetValue("DisplayName", "Note Kraken");
-        key.SetValue("DisplayIcon", iconPath);
-        key.SetValue("DisplayVersion", "1.0");
-        key.SetValue("Publisher", "Kraken Software");
+        key.SetValue("DisplayIcon", icon);
+        key.SetValue("DisplayVersion", AppVersion);
+        key.SetValue("Publisher", "Kraken Unbound");
         key.SetValue("InstallLocation", installPath);
-        key.SetValue("UninstallString", $"powershell -ExecutionPolicy Bypass -Command \"Remove-Item -Recurse -Force '{installPath}'; Remove-Item 'HKCU:\\Software\\NoteKraken' -Recurse -ErrorAction SilentlyContinue; Remove-Item 'HKCU:\\Software\\Classes\\NoteKraken.TextFile' -Recurse -ErrorAction SilentlyContinue; Remove-Item 'HKCU:\\Software\\Classes\\Applications\\NoteKraken.exe' -Recurse -ErrorAction SilentlyContinue; Remove-ItemProperty 'HKCU:\\Software\\RegisteredApplications' -Name 'NoteKraken' -ErrorAction SilentlyContinue; Remove-Item 'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\NoteKraken' -Recurse\"");
-        key.SetValue("NoModify", 1);
-        key.SetValue("NoRepair", 1);
+        key.SetValue("InstallDate", DateTime.Now.ToString("yyyyMMdd"));
+        key.SetValue("UninstallString", uninstall);
+        key.SetValue("QuietUninstallString", uninstall.Replace("powershell.exe ", "powershell.exe -WindowStyle Hidden "));
+        key.SetValue("NoModify", 1, RegistryValueKind.DWord);
+        key.SetValue("NoRepair", 1, RegistryValueKind.DWord);
     }
 
     private static void CreateShortcut(string shortcutPath, string targetPath, string iconPath)
     {
-        // Use PowerShell to create shortcut (avoids COM interop)
+        Directory.CreateDirectory(Path.GetDirectoryName(shortcutPath)!);
         string script = $@"
-$WshShell = New-Object -ComObject WScript.Shell
-$Shortcut = $WshShell.CreateShortcut('{shortcutPath.Replace("'", "''")}')
-$Shortcut.TargetPath = '{targetPath.Replace("'", "''")}'
-$Shortcut.IconLocation = '{iconPath.Replace("'", "''")}'
-$Shortcut.WorkingDirectory = '{Path.GetDirectoryName(targetPath)?.Replace("'", "''")}'
-$Shortcut.Save()
+$shell = New-Object -ComObject WScript.Shell
+$shortcut = $shell.CreateShortcut('{EscapePowerShellLiteral(shortcutPath)}')
+$shortcut.TargetPath = '{EscapePowerShellLiteral(targetPath)}'
+$shortcut.IconLocation = '{EscapePowerShellLiteral(iconPath)}'
+$shortcut.WorkingDirectory = '{EscapePowerShellLiteral(Path.GetDirectoryName(targetPath)!)}'
+$shortcut.Save()
 ";
-        var psi = new ProcessStartInfo
+        string encoded = Convert.ToBase64String(Encoding.Unicode.GetBytes(script));
+        using var process = Process.Start(new ProcessStartInfo
         {
-            FileName = "powershell",
-            Arguments = $"-ExecutionPolicy Bypass -Command \"{script.Replace("\"", "\\\"")}\"",
+            FileName = "powershell.exe",
+            Arguments = $"-NoProfile -NonInteractive -ExecutionPolicy Bypass -EncodedCommand {encoded}",
             UseShellExecute = false,
             CreateNoWindow = true
-        };
-        using var process = Process.Start(psi);
-        process?.WaitForExit();
+        }) ?? throw new InvalidOperationException("Could not create a Windows shortcut.");
+        process.WaitForExit();
+        if (process.ExitCode != 0 || !File.Exists(shortcutPath))
+            throw new InvalidOperationException($"Could not create shortcut: {shortcutPath}");
     }
+
+    private static string EscapePowerShellLiteral(string value) => value.Replace("'", "''");
 }

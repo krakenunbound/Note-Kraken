@@ -4,7 +4,7 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
-    <ApplicationIcon>..\..\kraken_transparent.ico</ApplicationIcon>
+    <ApplicationIcon>..\..\assets\note-kraken.ico</ApplicationIcon>
     <AssemblyName>NoteKraken_Setup</AssemblyName>
     <RootNamespace>NoteKrakenInstaller</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -13,14 +13,23 @@
     <SelfContained>true</SelfContained>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <PublishTrimmed>false</PublishTrimmed>
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+    <Version>1.1.0</Version>
+    <AssemblyVersion>1.1.0.0</AssemblyVersion>
+    <FileVersion>1.1.0.0</FileVersion>
+    <Product>Note Kraken Setup</Product>
+    <AssemblyTitle>Note Kraken Setup</AssemblyTitle>
+    <Company>Kraken Unbound</Company>
+    <Authors>The Kraken</Authors>
+    <Description>Installer for Note Kraken 1.1.0.</Description>
   </PropertyGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="..\..\release_build\NoteKraken.exe" LogicalName="NoteKraken.exe" />
-    <EmbeddedResource Include="..\..\release_build\NoteKraken.dll" LogicalName="NoteKraken.dll" />
-    <EmbeddedResource Include="..\..\release_build\NoteKraken.deps.json" LogicalName="NoteKraken.deps.json" />
-    <EmbeddedResource Include="..\..\release_build\NoteKraken.runtimeconfig.json" LogicalName="NoteKraken.runtimeconfig.json" />
-    <EmbeddedResource Include="..\..\kraken_transparent.ico" LogicalName="kraken_transparent.ico" />
+    <EmbeddedResource Include="..\..\assets\note-kraken.ico" LogicalName="note-kraken.ico" />
   </ItemGroup>
 
 </Project>
