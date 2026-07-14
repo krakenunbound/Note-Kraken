@@ -2,21 +2,21 @@
 
 Note Kraken is a fast, focused Windows text editor: no accounts, cloud sync, telemetry, AI, or plugin system—just the useful parts of classic Notepad.
 
-![Note Kraken icon](assets/note-kraken.png)
+![Note Kraken icon](https://raw.githubusercontent.com/krakenunbound/Note-Kraken/master/assets/note-kraken.png)
 
 ## Screenshots
 
 ### Editor
 
-![Note Kraken editor showing encoding, line endings, zoom, and cursor position](docs/screenshots/note-kraken-editor.png)
+![Note Kraken editor showing encoding, line endings, zoom, and cursor position](https://raw.githubusercontent.com/krakenunbound/Note-Kraken/master/docs/screenshots/note-kraken-editor.png)
 
 ### Find and replace
 
-![Note Kraken Find and Replace dialog](docs/screenshots/note-kraken-find-replace.png)
+![Note Kraken Find and Replace dialog](https://raw.githubusercontent.com/krakenunbound/Note-Kraken/master/docs/screenshots/note-kraken-find-replace.png)
 
 ### Installer and file associations
 
-![Note Kraken installer with shortcut and file-association choices](docs/screenshots/note-kraken-installer.png)
+![Note Kraken installer with shortcut and file-association choices](https://raw.githubusercontent.com/krakenunbound/Note-Kraken/master/docs/screenshots/note-kraken-installer.png)
 
 ## Features
 
